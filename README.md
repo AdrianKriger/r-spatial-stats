@@ -11,7 +11,7 @@ In this exercise, we will explore the concepts and applications of Deterministic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
 &nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
-&nbsp;&nbsp;&nbsp;**3)** we also briefly highlight ways we can **assess the quality** of an interpolation with;  
+&nbsp;&nbsp;&nbsp;**3)** we also briefly highlight ways we can **interrogate the quality** of an interpolation with;  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation; and  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
