@@ -21,25 +21,26 @@ font-style: italic;
 
 </div>  
 
-Welcome to this exercise which explores **_(Geo)statistical analysis with R_**. 
+Welcome to this exercise which explores **(Geo)statistical analysis with R**. 
 
 This assignment is an opportunity for you to dive into the `R` statistical package for spatial interpolation and in particular, to start to learn some of the capabilities of the `gstat` package (_and the various commands and some of the graphical outputs which can be produced)_.
 
 <div class="alert alert-block alert-success"> **Our focus is understanding concepts, the analysis, potential and application of these methods.** </div>
 
-We do not cover all the details of the `gstat` package capability. If you are unsure what the parameters for a particular function are or if you wish to explore other arguments related to a function, please consult the `help` files or the relevant package vignettes.
+We do not cover all the details of the `gstat`. If you are unsure what the parameters for a particular function are or if you wish to explore other arguments related to a function, please consult the `help` files or the relevant package vignettes.
 
 In this assignment, you will work through the two major _**interpolation**_ categories. These are: 
 
 &nbsp;&nbsp;&nbsp;**1. Deterministic**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. Linear Regression  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Inverse Distance Weighting  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. linear Regression  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
 &nbsp;&nbsp;&nbsp;**2. Stochastic**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
 &nbsp;&nbsp;&nbsp;**3.** we also briefly highlight methods to **interrogate the quality of an interpolation** with  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation and Residual Mean Squared Error (rmse).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation and  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
 <div class="alert alert-danger">
   <strong>REQUIRED!</strong> 
@@ -260,6 +261,23 @@ In this exercise we will cover four.
 
 Also called a voronoi diagram these methods are characterized by abrupt edge changes with only one point for each prediction.
 
+```{r voronoi-vector }
+#- Voronoi tesselation
+pnts <- st_union(meuse.sf)
+voronoi_grid <- st_voronoi(pnts)
+voronoi_sf <- st_sf(geometry = st_collection_extract(voronoi_grid, "POLYGON")) |>
+  st_join(meuse.sf[,"zinc"])
+```
+
+```{r plot-voronoi-vector }
+#-- plot
+plot(voronoi_sf[,"zinc"],
+     xlim=c(178605,181390),
+     ylim=c(329714,333611), main="Thiessen Polygons")
+#title("Tesselated Voronoi Surface")
+```
+Or we could create a tessellated surface directly
+
 ```{r voronoi }
 # Voronoi tesselation
 thiessen = krige(log10(zinc) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
@@ -268,39 +286,119 @@ thiessen = krige(log10(zinc) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
 ```{r plot-voronoi }
 #-- plot
 pts.s <- list("sp.points", meuse.sf, col="white",pch=20)
-plot(thiessen["var1.pred"], pch=15,main="Thiessen Polygons")
+plot(thiessen["var1.pred"], pch=15, main="Thiessen Polygons")
 ```
-Notice we have not _interpolated_. We have assigned a value to an area.
-<!-- # ```{r voronoi } -->
-<!-- # #- Voronoi tesselation -->
-<!-- # pnts <- st_union(meuse.sf) -->
-<!-- # voronoi_grid <- st_voronoi(pnts) -->
-<!-- # ``` -->
-<!-- #  -->
-<!-- # ```{r plot-voronoi } -->
-<!-- # #-- plot -->
-<!-- # plot(voronoi_grid, col = NA, #meuse.sf[,"zinc"], -->
-<!-- #         xlim=c(178605,181390), -->
-<!-- #         ylim=c(329714,333611)) -->
-<!-- # points(st_coordinates(meuse.sf)[,1], st_coordinates(meuse.sf)[,2], -->
-<!-- #         pch=21, -->
-<!-- #         bg=sp::bpy.colors(length(meuse.sf$zinc))[rank(meuse.sf$zinc)], -->
-<!-- #        cex=0.4*meuse.sf$zinc/max(meuse.sf$zinc)) -->
-<!-- # #grid() -->
-<!-- # title("Tesselated Voronoi Surface") -->
-<!-- # ``` -->
+Notice we have **not _interpolated_**. We have assigned a value to an area.
 
 ___
 
-### 1. b. Inverse Distance Weighting (IDW)
+## 1. b. Regression Modelling 
 
-With IDW we start _interpolating_ This means we convert point data of numerical values into a continuous surface and visualise how the data may be distributed across space.
+A common non-spatial (feature-space) approach to **_approximation_** is to model one variables’ distribution (the dependent or response variable) by one or more other variables (the independent or predictor variables). This is sometimes commonly called **_'regression modelling'_**.
 
-IDW _interpolates_ point data by using a weighted average of a variable from nearby points to predict the value of that variable for each location (de Smith et al, 2018). The weighting of the points is determined by their inverse distances; drawing on Tobler’s first law of geography.
+<div class="alert alert-success"> <strong>CONCEPT CHECK: Regression Modeling and Interpolation</strong> 
+
+While this might seem excessive; the words we use here are relevant and their application is determined by the challenge. 
+
+When we **interpolate** we look for a function that fits the values of a dataset **exactly**. Here we say: given $n$ $(x_i, y_i)$ points we look for a function $F$ that satisfies $F(x_i, y_i) = z_i$. 
+
+Very often, within the spatial domain what this mean is; we generally have a coordinate value $(x, y)$ and want to predict a $z$. Additionally $F$ is typically a polynomial (1st, 2nd, etc) or a Spline.
+
+**Regression** refers to fitting a function to minimise some cost; typically **_sum of squares error_**. What this means is given a dataset of $n$ points regression looks to **_find the line of best fit_**. 
+
+Regression can approximate while Interpolation can predict. Interpolation goes further than regression because it typically uses a regression model to predict values **between** _(at upsampled locations)_ a given dataset. 
+
+We start with Regression and follow on with Interpolation.
+
+</div>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 6.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
+
+```{r plot-dist }
+# Map of distance to river: 
+meuse.grid.sf$sqrtdist <- sqrt(meuse.grid.sf$dist)
+plot(meuse.grid.sf["sqrtdist"], #col = bpy.colors() , 
+     #sp.layout = list("sp.points", meuse.sf, col = 3, cex=.5), 
+     main = "Distance to river")
+```
+
+```{r plot-scatter }
+# Map of distance to river: 
+plot(log(zinc)~sqrt(dist), as.data.frame(meuse.sf),
+     main="Scatterplot of Zinc vs. distance")
+```
+
+```{r fit-regression }
+# Fit the regression model
+zinc.lm <- lm(log(zinc)~sqrt(dist), meuse.sf)
+```
+
+```{r summary-reg }
+# Get a summary of the regression model
+summary(zinc.lm)
+```
+
+```{r plot-diagnostic }
+# Get diagnostic plots
+layout(matrix(1:4, ncol=2))
+plot(zinc.lm, add.smooth = FALSE)
+layout(1)
+```
+
+<!-- # ```{r plot-diagnostic02 } -->
+<!-- # # Get diagnostic plots -->
+<!-- # layout(matrix(1:4, ncol=2)) -->
+<!-- # plot(zinc.lm, add.smooth = FALSE) -->
+<!-- # layout(1) -->
+<!-- # ``` -->
+
+```{r predict-std-error }
+# Get Predicted Values and Standard Error of Fit for all locations on the grid
+meuse.grid.sf$lzn.fit <- predict(zinc.lm, meuse.grid.sf)
+meuse.grid.sf$se.fit <- predict(zinc.lm, meuse.grid.sf, se.fit=TRUE)$se.fit
+```
+
+```{r plot-preds }
+# Plot the predicted values
+plot(meuse.grid.sf['lzn.fit'], #"lzn.fit", #sp.layout = meuse.lt,
+     main = "Log(Zinc) - ppm: approximated Regression values")
+```
+
+```{r plot-std-fit }
+# Plot the Standard Error of fit
+plot(meuse.grid.sf["se.fit"], #, sp.layout = meuse.lt,
+     main = "Log(Zinc) - ppm: approximated Regression Standard Error of fit")
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
+
+<p class="comment">
+[ Answer 6. click in this cell and type your answers here. your answers must be between the outer [] brackets  
+- the distance to river:  
+- the scatter plot:  
+- the regression:  
+- the summary:  
+- the diagnostic:  
+- the standard error, prediction and standard fit:
+      ] </p>
+
+___
 
 <div class="alert alert-danger">
   <strong>STOP HERE!</strong> 
 </div>
+
+### 1. b. Inverse Distance Weighting (IDW)
+
+With IDW we start **_interpolating_**. This means we convert point data, of numerical values, into a continuous surface and visualize how the data may be distributed across space.
+
+IDW _interpolates_ point data by using a weighted average of a variable from nearby points to predict the value of that variable for each location.. The weighting of the points is determined by their inverse distances; drawing on Tobler’s first law of geography which states: 
+
+_'everything is related to everything else, but near things are more related than distant things'_
+
+
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
@@ -362,98 +460,7 @@ ggplot(data = meuse.sf) +
 [ Answer 5. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
 </p>
 
-2. Regression Modelling 
 
-A common non-spatial (feature-space) approach to _approximation_ is to model one variables’ distribution (the dependent or response variable) by one or more other variables (the independent or predictor variables). This is sometimes commonly called _“regression modelling”_.
-
-<div class="alert alert-success"> <strong>CONCEPT CHECK: </strong>Regression Modeling and Interpolation 
-
-While this might seem excessive; the words we use here are relevant and their application is determined by the challenge. 
-
-When we **interpolate** we look for a function that fits the values of a dataset **exactly**. Here we say: given $n$ $(x_i, y_i)$ points we look for a function $F$ that satisfies $F(x_i) = y_i$. Typically $F$ is a polynomial (1st, 2nd, etc) or a Spline.
-
-**Regression** refers to fitting a function to minimise some cost; typically **_sum of squares error_**. What this means is given a dataset of $n$ points regression looks to **_find the line of best fit_**. 
-
-Regression can approximate while Interpolation can predict. Interpolation goes further than regression because it typically uses a regression model to predict values **between** _(at upsampled locations)_ a given dataset. 
-
-We start with Regression and follow on with Interpolation.
-
-</div>
-
-<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
-
-- **Question 6.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
-
-```{r plot-dist }
-# Map of distance to river: 
-meuse.grid$sqrtdist <- sqrt(meuse.grid$dist)
-spplot(meuse.grid["sqrtdist"], col.regions = bpy.colors() , 
-       sp.layout = list("sp.points", meuse, col = 3, cex=.5), 
-       main = "Distance to river")
-```
-
-```{r plot-scatter }
-# Map of distance to river: 
-xyplot(log(cadmium)~sqrt(dist), as.data.frame(meuse),
-       main="Scatterplot of Cadmium vs. distance")
-```
-
-```{r fit-regression }
-# Fit the regression model
-cadmium.lm <- lm(log(cadmium)~sqrt(dist), meuse)
-```
-
-```{r summary-reg }
-# Get a summary of the regression model
-summary(cadmium.lm)
-```
-
-```{r plot-diagnostic }
-# Get diagnostic plots
-layout(matrix(1:4, ncol=2))
-plot(cadmium.lm, add.smooth = FALSE)
-layout(1)
-```
-
-```{r plot-diagnostic02 }
-# Get diagnostic plots
-layout(matrix(1:4, ncol=2))
-plot(cadmium.lm, add.smooth = FALSE)
-layout(1)
-```
-
-```{r predict-std-error }
-# Get Predicted Values and Standard Error of Fit for all locations on the grid
-meuse.grid$lzn.fit <- predict(cadmium.lm, meuse.grid)
-meuse.grid$se.fit <- predict(cadmium.lm, meuse.grid, se.fit=TRUE)$se.fit
-```
-
-```{r plot-preds }
-# Plot the predicted values
-spplot(meuse.grid, "lzn.fit", sp.layout = meuse.lt,
-       main = "Log(Cadmium) - ppm: Regression Interpolation \n Predicted values")
-
-```
-
-```{r plot-std-fit }
-# Plot the Standard Error of fit
-spplot(meuse.grid, "se.fit", sp.layout = meuse.lt,
-       main = "Log(Cadmium) - ppm: Regression Interpolation \n Standard Error of fit")
-```
-
-<div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
-
-<p class="comment">
-[ Answer 6. click in this cell and type your answers here. your answers must be between the outer [] brackets 
-
->> - the distance to river: 
->> - the scatter plot:
->> - the regression:
->> - the summary:
->> - the diagnostic
->> - the standard error, prediction and standard fit
-
-      ] </p>
 
 2. Inverse Distance Weighting (IDW)
 
@@ -492,7 +499,7 @@ In other words we; _predict_ values at upsampled locations (the `meuse grid`) wi
 
 We want realistic results and a prediction within our dataset. **The higher the degree the more extreme the extrapolations.**
 
-div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
 - **Question 8.**  Run the following code chunk to perform trend surface interpolation. Compare the three interpolation maps and discuss the results. Which one gives a better fit? Why?
 
