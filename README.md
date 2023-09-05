@@ -1,1 +1,1 @@
-# r-spatial-stats
+# (Geo)spatial Statistics with R (Meuse)
