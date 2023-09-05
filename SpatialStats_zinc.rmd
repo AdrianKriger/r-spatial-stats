@@ -1,0 +1,652 @@
+---
+##-- arkriger: October 2023
+title: "Spatial Statistics"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+<style> 
+p.comment {
+background-color: #DBDBDB;
+padding: 10px;
+border: 1px solid black;
+margin-left: 25px;
+border-radius: 5px;
+font-style: italic;
+}
+
+</style>
+<div class="alert alert-info"> <strong>NAME: </strong> _[write your name.surname between the brackets (like that name.surname)]_
+
+</div>  
+
+Welcome to this exercise which explores **_geostatistical analysis with R_**. 
+
+This assignment is an opportunity for you to dive into the `R` statistical package for spatial interpolation and in particular, to start to learn some of the capabilities of the `gstat` package (_and the various commands and some of the graphical outputs which can be produced)_.
+The commands used in this document are largely illustrative and in most cases use default arguments for the function calls. The exercise provides basic examples of the package functionality.
+
+<div class="alert alert-block alert-success"> **Our focus is understanding concepts, the analysis, potential and application of these methods.** </div>
+
+We do not cover all the details of the `gstat` package capability. If you are unsure what the parameters for a particular function are or if you wish to explore other arguments related to a function, please consult the `help` files or the relevant package vignettes.
+
+In this assignment, you will work through the two major _**interpolation**_ categories; using the meuse data set and the `gstat` package: These are: 
+
+&nbsp;&nbsp;&nbsp;**1) Deterministic**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Inverse Distance Weighting  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. linear Regression  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
+&nbsp;&nbsp;&nbsp;**2) Stochastic**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Kriging
+
+<div class="alert alert-danger">
+  <strong>REQUIRED!</strong> 
+  
+You are required to insert your outputs and any comment into this document. The document you submit should therefore contain the existing text in addition to:
+
+ - Plots and other outputs from executing the code chunks
+ - Discussion of your plots and other outputs as well as conclusions reached.
+ - This should also include any hypotheses and assumptions made as well as factors that may affect your conclusions.
+</div>
+
+To help you with interpreting your outputs, please consult the following resources:
+
+||
+|:---|
+|**Chapter 15:** Introduction to Geographic Information Systems [9th ed.] Kang-tsung Chan. A copy of this is available on Amathuba inside the Resources folder, Study Material & Books|
+|**Chapter 8:** Applied Spatial Data Analysis with R by Bivand et. al. (2008). A copy of this is available on Amathuba inside the Resources folder, Study Material & Books|
+
+
+```{r install }
+options(prompt="> ", continue="+ ", digits=3, width=70,  show.signif.stars=F, repr.plot.width=7, repr.plot.height=7)
+rm(list=ls())
+
+# Install necessary packages: You only need to run this part once
+##- install.packages(c("sf", "gstat", "lattice", "automap"))))
+
+library(sp)
+library(sf) # 'simple features' representations of spatial objects
+library(gstat) # geostatistics
+library(ggplot2) # plotting
+library(lattice)
+library(automap)
+```
+
+```{r help }
+#- help
+help(package="gstat")
+```
+
+```{r data }
+#data(package="sp")
+```
+
+<div class="alert alert-success">
+  <strong>THE DATASET: This assignment is based on the meuse data set.</strong> 
+
+The data set which can be found in the `gstat` package consists of 155 samples of top soil heavy metal concentrations (ppm), along with a number of soil and landscape variables. The samples were collected in a flood plain of the river Meuse, near the village Stein in the Netherlands. Historic metal mining has caused the widespread dispersal of lead, zinc, copper and cadmium in the alluvial soil. 
+</div>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 1.**  What would be the purpose of producing a map of zinc or cadmium deposits? Who would use a map of this nature? 
+
+<p class="comment">
+[ Answer 1. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+
+```{r load-data }
+data("meuse", package = "sp")
+```
+
+```{r descr-data }
+#- describe data
+meuse
+```
+
+```{r class }
+class(meuse)
+```
+
+```{r str }
+str(meuse)
+```
+
+```{r summary }
+summary(meuse)
+```
+
+Notice the spatial aspect of the data (x and y) are fields. We need to explicitly define the data as a spatial object. We do this through identifying the coordinates.
+
+```{r to-sf }
+meuse.sf <- st_as_sf(meuse, coords = c("x","y"))
+class(meuse.sf)
+```
+
+```{r structure}
+str(meuse.sf)
+```
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 2.**  Which field refers to the spatial object’s geometry? What is its data type?
+
+<p class="comment">
+[ Answer 2. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+Although we have coordinate values we have yet to define a coordinate reference system (crs)
+
+```{r crs }
+st_crs(meuse.sf) <- 28992
+print(st_crs(meuse.sf))
+```
+
+To add context; the dataset includes a river object; we can include when we plot the points
+
+```{r river }
+data(meuse.riv, package="sp")
+class(meuse.riv)
+```
+
+```{r river-crs }
+meuse.riv.sf <- st_sfc(st_linestring(meuse.riv, dim="XY"), crs = st_crs(meuse.sf))
+class(meuse.riv.sf)
+```
+
+```{r river-summary }
+summary(meuse.riv.sf)
+```
+
+```{r points-plot }
+#basic plot
+plot(meuse.sf['zinc'], asp = 1, pch = 1) 
+#data(meuse.riv)
+lines(meuse.riv)
+```
+We can add contex with the river
+
+```{r points-plot02 }
+plot(meuse.sf["zinc"], reset = FALSE, nbreaks = 64, pch = 20, 
+     cex=4*meuse.sf$zinc/max(meuse.sf$zinc), 
+     #col=rainbow(100),
+     main = "Zn concentration [ppm]") 
+plot(meuse.riv.sf, add = TRUE)
+```
+
+Or we could `plot()` the dataset differently
+
+```{r points-plot03 }
+ggplot(data = meuse.sf) + 
+  geom_sf(mapping = aes(size=zinc, color=dist.m)) + 
+  labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
+       color="Distance to river [m]", size = "Zn concentration, ppm")
+```
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 3.**  How are the points distributed over the study area? For example, are they evenly-spaced (gridded)? Random? Denser in some areas? 
+
+<p class="comment">
+[ Answer 3. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+This specific dataset comes with a 40*40-m interpolation grid (a set of regularly-spaced points that covers the study area and specify locations were predictions will be done)
+
+```{r grid }
+data(meuse.grid, package="sp")
+class(meuse.grid)
+```
+
+```{r grid-names }
+names(meuse.grid)
+```
+
+Like the sample points; the grid needs to be explicitly defined
+
+```{r grid-crs }
+meuse.grid.sf <- st_as_sf(meuse.grid, coords = c("x", "y"))
+st_crs(meuse.grid.sf) <- st_crs(meuse.sf)
+summary(meuse.grid.sf)
+```
+
+If you explore the grid object you'll notice it contains several attributes
+
+```{r grid-summary }
+summary(meuse.grid.sf)
+```
+
+Its even possible to plot some of the attributes
+
+```{r ffreq-plot }
+plot(meuse.grid.sf["ffreq"], pch = 15,
+main = "Meuse River, flooding frequency classes")
+```
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 3.**  What is the meaning of flood frequency class 1? What is its spatial distribution? 
+
+</style>
+<div class="alert alert-info"> <strong>HINT:</strong> Consider using the `help` function.</div> 
+
+<p class="comment">
+[ Answer 3. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+<div class="alert alert-success">
+  <strong>Why do we need to interpolate?</strong> 
+
+**Generally we want to _interpolate_ data because we either do not have the resources _(money and time)_ or it simply is it feasible to collect data everywhere.** 
+
+Our data will have gaps. When these cases arrive, and they arrive often, we need a method to _predict_ values where we have non. 
+</div>
+
+## 1. Deterministic (non-geostatistical) Methods 
+
+**These are models where arbitrary _(random)_ or empirical _(observed)_ model parameters are used with no estimates of the model error and no assumptions about the variability of a feature. In this exercise we will cover four.
+
+1. a. Thiessen polygons
+
+Also called a voronoi diagram these methods are characterized by abrupt edge changes with only one point for each prediction.
+
+```{r voronoi }
+# Voronoi tesselation
+pnts <- st_union(meuse.sf)
+voronoi_grid <- st_voronoi(pnts)
+```
+
+```{r plot-voronoi }
+#-- plot
+plot(voronoi_grid, col = NA, #meuse.sf[,"zinc"],
+       xlim=c(178605,181390),
+       ylim=c(329714,333611))
+points(st_coordinates(meuse.sf)[,1], st_coordinates(meuse.sf)[,2],
+       pch=21,
+       bg=sp::bpy.colors(length(meuse.sf$zinc))[rank(meuse.sf$zinc)],
+       cex=0.4*meuse.sf$zinc/max(meuse.sf$zinc))
+#grid()
+title("Tesselated Voronoi Surface")
+
+```
+## 1. b. Inverse Distance Weighting (IDW)
+
+With IDW we start _interpolating_ This means we convert point data of numerical values into a continuous surface and visualise how the data may be distributed across space.
+
+IDW _interpolates_ point data by using a weighted average of a variable from nearby points to predict the value of that variable for each location (de Smith et al, 2018). The weighting of the points is determined by their inverse distances; drawing on Tobler’s first law of geography.
+
+<div class="alert alert-danger">
+  <strong>STOP HERE!</strong> 
+</div>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 4.**  1.	Execute the following 5 blocks (chunks) of code and briefly describe all outputs
+
+```{r cadmium-summary }
+# Summary Statistics
+summary(meuse.sf$cadmium) 
+summary(log(meuse.sf$cadmium))
+```
+
+```{r plot-stem-leaf }
+# Steam and leaf plot
+stem(meuse.sf$cadmium) 
+stem(log(meuse.sf$cadmium))
+```
+
+```{r plot-hist }
+# Histogram and Q-Q Plots
+par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
+hist(meuse.sf$cadmium, n=20, main = "Histogram of Cadmium (ppm)")
+hist(log(meuse.sf$cadmium), n=20, main = "Histogram of Log-Cadmium  (ppm)")
+```
+
+```{r plot-box }
+par(mfrow=c(1,2))
+boxplot(meuse.sf$cadmium, main = "Boxplot of Cadmium (ppm)")
+boxplot(log(meuse.sf$cadmium), main = "Boxplot of Log-Cadmium (ppm)")
+```
+
+```{r plot-qq }
+par(mfrow=c(1,2))
+qqnorm(meuse$cadmium,  main = "Q-Q Plot of Cadmium  (ppm)")
+qqnorm(log(meuse$cadmium),  main = "Q-Q Plot of Log-Cadmium (ppm)")
+
+par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+
+```
+<div class="alert alert-info"> <strong>HINT</strong> Describe the original and log transformed variables with respect to data distribution _(symmetry, modality, distribution, variance [or homoescedascity] presence of outliers, etc.)_. Also indicate if the transformation was appropriate for the data.</div>
+
+<p class="comment">
+[ Answer 4. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 5.**  1.	Execute the following code chunk and briefly describe what you observe with respect to the spatial distribution of Cadmium.
+
+```{r points-plot04 }
+ggplot(data = meuse.sf) + 
+  geom_sf(mapping = aes(size=zinc, color=dist.m)) + 
+  labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
+       color="Distance to river [m]", size = "Zn concentration, ppm")
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> Talk about positions of the data in relation to the bounds of the region, the locations of high and low values and the presence of possible outliers. </div>
+
+<p class="comment">
+[ Answer 5. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
+2. Regression Modelling 
+
+A common non-spatial (feature-space) approach to _approximation_ is to model one variables’ distribution (the dependent or response variable) by one or more other variables (the independent or predictor variables). This is sometimes commonly called _“regression modelling”_.
+
+<div class="alert alert-success"> <strong>CONCEPT CHECK: </strong>Regression Modeling and Interpolation 
+
+While this might seem excessive; the words we use here are relevant and their application is determined by the challenge. 
+
+When we **interpolate** we look for a function that fits the values of a dataset **exactly**. Here we say: given $n$ $(x_i, y_i)$ points we look for a function $F$ that satisfies $F(x_i) = y_i$. Typically $F$ is a polynomial (1st, 2nd, etc) or a Spline.
+
+**Regression** refers to fitting a function to minimise some cost; typically **_sum of squares error_**. What this means is given a dataset of $n$ points regression looks to **_find the line of best fit_**. 
+
+Regression can approximate while Interpolation can predict. Interpolation goes further than regression because it typically uses a regression model to predict values **between** _(at upsampled locations)_ a given dataset. 
+
+We start with Regression and follow on with Interpolation.
+
+</div>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 6.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
+
+```{r plot-dist }
+# Map of distance to river: 
+meuse.grid$sqrtdist <- sqrt(meuse.grid$dist)
+spplot(meuse.grid["sqrtdist"], col.regions = bpy.colors() , 
+       sp.layout = list("sp.points", meuse, col = 3, cex=.5), 
+       main = "Distance to river")
+```
+
+```{r plot-scatter }
+# Map of distance to river: 
+xyplot(log(cadmium)~sqrt(dist), as.data.frame(meuse),
+       main="Scatterplot of Cadmium vs. distance")
+```
+
+```{r fit-regression }
+# Fit the regression model
+cadmium.lm <- lm(log(cadmium)~sqrt(dist), meuse)
+```
+
+```{r summary-reg }
+# Get a summary of the regression model
+summary(cadmium.lm)
+```
+
+```{r plot-diagnostic }
+# Get diagnostic plots
+layout(matrix(1:4, ncol=2))
+plot(cadmium.lm, add.smooth = FALSE)
+layout(1)
+```
+
+```{r plot-diagnostic02 }
+# Get diagnostic plots
+layout(matrix(1:4, ncol=2))
+plot(cadmium.lm, add.smooth = FALSE)
+layout(1)
+```
+
+```{r predict-std-error }
+# Get Predicted Values and Standard Error of Fit for all locations on the grid
+meuse.grid$lzn.fit <- predict(cadmium.lm, meuse.grid)
+meuse.grid$se.fit <- predict(cadmium.lm, meuse.grid, se.fit=TRUE)$se.fit
+```
+
+```{r plot-preds }
+# Plot the predicted values
+spplot(meuse.grid, "lzn.fit", sp.layout = meuse.lt,
+       main = "Log(Cadmium) - ppm: Regression Interpolation \n Predicted values")
+
+```
+
+```{r plot-std-fit }
+# Plot the Standard Error of fit
+spplot(meuse.grid, "se.fit", sp.layout = meuse.lt,
+       main = "Log(Cadmium) - ppm: Regression Interpolation \n Standard Error of fit")
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
+
+<p class="comment">
+[ Answer 6. click in this cell and type your answers here. your answers must be between the outer [] brackets 
+
+>> - the distance to river: 
+>> - the scatter plot:
+>> - the regression:
+>> - the summary:
+>> - the diagnostic
+>> - the standard error, prediction and standard fit
+
+      ] </p>
+
+2. Inverse Distance Weighting (IDW)
+
+We now introduce interpolation. First deterministic methods and later highlight stocastic technics.
+
+IDW calculates an average value for estimated locations using values from nearby weighted locations.
+
+div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 7.**  Use the following code chunk to generate interpolated surfaces of log (cadmium) concentration obtained using Inverse-Distance Weighting (IDW) with different power functions (p). Discuss all outputs and draw conclusions. Give reasons for your conclusions.
+
+```{r idw }
+# Run the IDW interpolation. check the effect of power (p) on the IDW interpolation by changing the value of "idp"
+
+meuse.grid$idwp05 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 0.5)$var1.pred
+meuse.grid$idwp1 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 1)$var1.pred
+meuse.grid$idwp25 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 2.5)$var1.pred
+meuse.grid$idwp5 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 5)$var1.pred
+meuse.grid$idwp10 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 10)$var1.pred
+# Plot the outputs and the control points 
+spplot(meuse.grid, c("idwp05", "idwp1", "idwp25","idwp5", "idwp10"), 
+       sp.layout = list("sp.points", meuse, col = 3, cex=.5),   
+       main = "Log(Cadmium) - ppm , IDW Interpolation ")
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> You should say something about the role of the power function and the quality/behaviour of the predictions with respect to the distribution and density of controls points etc.</div>
+
+<p class="comment">
+[ Answer 7. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+
+3. Trend Surface Analysis with Ordinary Least Squares (OLS)
+
+We are now firmly in the realm of Trend Surface Analysis. What we mean by a **_trend surface_** is: a variable (say $z$ or elevation) can be expressed some smooth function of coordinates ($x_i, y_i$). A polynomial function of the coordinates. 
+In other words we; _predict_ values at upsampled locations (the `meuse grid`) with a 1st-, 2nd- and 3rd-order polynomial. The higher the degree of the polynomial (1st, 2nd, 3rd, etc.) the more the surface matches the original data. We should however take care.
+
+We want realistic results and a prediction within our dataset. **The higher the degree the more extreme the extrapolations.**
+
+div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 8.**  Run the following code chunk to perform trend surface interpolation. Compare the three interpolation maps and discuss the results. Which one gives a better fit? Why?
+
+```{r ols }
+#-- trend surface up to degree 3
+#- Note: tr1, tr2 and tr3 are names for Trend surface of order 1, 2 and 3 respectively
+
+meuse.grid$tr1 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 1)$var1.pred
+meuse.grid$tr2 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 2)$var1.pred
+meuse.grid$tr3 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 3)$var1.pred
+spplot(meuse.grid, c("tr1", "tr2", "tr3"), sp.layout = meuse.lt,
+       main = "Log(cadmium) - ppm \n Trend Surface Interpolation")
+
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> Talk about the appropriateness of trend orders with respect to the nature of the interpolated surface, the quality of interpolation with respect to the distribution and density of controls points etc.</div>
+
+<p class="comment">
+[ Answer 8. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+3. Variogram and Kriging
+
+While OLS predicts with a polynomial and applies a general error term we can in fact go further. 
+
+One of the principles of Spatial Data Science is; **data is spatially autocorrelated**. Patterns and particularly residuals (errors) have a spatial structure / are connected.
+
+We can model the spatial structure of residuals with a **variogram**; and then use this model to refine a trend surface with Kriging; a powerful geostatistical interpolation method.
+
+First; we investigate the variance of the dataset then model and later fit this model to a special form of linear interpolation: Kriging. 
+
+This makes sense. We determine the structure (spatial correlation) of the dataset. And we use this knowledge to refine our _least squares_ prediction.  
+
+div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 9.**  Use the next set of commands to estimate the variogram and to perform Kriging interpolation and comment on the output, plots and results.
+
+
+```{r h-scatter }
+###################################################
+### 8.4 Estimating Spatial Correlation: The Variogram - Bivand et al. (2008)
+### 8.4.1 Exploratory Variogram Analysis
+###################################################
+
+### h-scatterplots/ lagged scatterplots
+hscat(log(cadmium)~1,meuse,(0:9)*100)
+```
+
+```{r v-cloud }
+### Variogram cloud
+plot(variogram(log(cadmium) ~ 1, meuse, cloud = TRUE))
+```
+
+```{r binned-variogram }
+###################################################
+### Sample variogram (binned variogram) plot of (8.4)
+###################################################
+plot(variogram(log(cadmium) ~ 1, meuse))
+```
+
+```{r variogram-anistropy }
+###################################################
+### Variograms in four different angles
+###################################################
+plot(variogram(log(cadmium) ~ 1, meuse, alpha = c(0, 45, 90, 135)))
+```
+
+```{r variogram-cut }
+###################################################
+### Override the default cutoff and interval width values ###  See Bivand et al. (2008)
+###################################################
+plot(variogram(log(cadmium) ~ 1, meuse, cutoff = 1000, width = 50))
+```
+
+```{r variogram-distance }
+###################################################
+### Specifying interval for the distance vector  - See Bivand et al. (2008)
+###################################################
+variogram(log(cadmium) ~ 1, meuse, boundaries = c(0,50,100,seq(250,1500,250)))
+```
+
+```{r variogram }
+######################################### ##########
+### Variogram in Fig. 8.6 - Bivand et al. (2008)
+###################################################
+v <- variogram(log(cadmium) ~ 1, meuse)
+plot(v)
+```
+
+```{r variogram-initial }
+###################################################
+### Initial values for the variogram fit 
+###################################################
+v.fit <- fit.variogram(v, vgm(1, "Sph", 800, 1))
+```
+
+```{r variogram-partial }
+###################################################
+### Partial fitting of variogram coefficients : PAGE 204 - Bivand et al. (2008)
+###################################################
+fit.variogram(v, vgm(1, "Sph", 800, 0.06), fit.sills = c(FALSE, TRUE))
+```
+
+```{r reml }
+###################################################
+###  REML (restricted maximum likelihood) fitting : PAGE 205 - Bivand et al. (2008)
+###################################################
+fit.variogram.reml(log(cadmium)~1, meuse, model=vgm(0.6, "Sph", 800, 0.06))
+```
+
+```{r variogram-anistropy02 }
+###################################################
+### 8.4.4 Anisotropy  - Bivand et al. (2008)
+###################################################
+v.dir <- variogram(log(cadmium)~1,meuse,alpha=(0:3)*45) 
+v.anis <- vgm(.6, "Sph", 1600, .05, anis=c(45, 0.3))
+```
+
+```{r variogram-plot }
+###################################################
+### Fig. 8.7 - Bivand et al. (2008)
+###################################################
+plot(v.dir, v.anis)
+```
+
+```{r variogram-map }
+###################################################
+### variogram map - Bivand et al. (2008)
+###################################################
+plot(variogram(log(cadmium)~1,meuse, map=TRUE, cutoff=1000, width=100))
+```
+
+```{r osk-ok-kriging }
+###################################################
+### 8.5.1 Simple Kriging and Ordinary Kriging  - Bivand et al. (2008)
+###################################################
+lz.sk <- krige(log(cadmium)~1, meuse, meuse.grid, v.fit, beta = 5.9)
+lz.ok <- krige(log(cadmium)~1, meuse, meuse.grid, v.fit)
+
+par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
+
+plot(lz.sk, pch=15,
+nbreaks = 64,
+main="SK prediction [log10(Cd ppm)]")
+
+plot(lz.ok, pch=15,
+nbreaks = 64,
+main="OK prediction [log10(Cd ppm)]")
+
+par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+```
+
+<div class="alert alert-info"> <strong>HINT</strong> Page numbers or plot numbers from sections with similar outputs from Bivand et al. (2008) have been indicated in the comments attached to the codes. Please refer to those sections/plots for guidance. In general, discuss all outputs (text and plots). What they are, what they do, what assumptions have been made etc.</div>
+
+<p class="comment">
+[ Answer 9. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 10.**  What other output(s) would you generate to access the quality of the Simple and Ordinary Kriging Interpolation?
+
+<div class="alert alert-info"> <strong>HINT</strong> How would you judge the quality of the interpolation? </div>
+
+<p class="comment">
+[ Answer 10. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+- **Question 11.**  Do a visual comparison of **ALL** the interpolation results from the methods and discuss your observations
+
+<div class="alert alert-info"> <strong>HINT</strong> What differences do you see from the interpolated maps you produced in terms of the behaviour of the predictions with respect to the distribution and density of controls points etc. </div>
+
+<p class="comment">
+[ Answer 11. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+- **Question 12.**  How else would you go about comparing the results from the various interpolation methods?
+
+<div class="alert alert-info"> <strong>HINT</strong> Summarise section 15.5 of [9th ed.] Kang-tsung Chan. </div>
+
+<p class="comment">
+[ Answer 12. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
