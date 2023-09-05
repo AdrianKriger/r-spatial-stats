@@ -239,14 +239,14 @@ main = "Meuse River, flooding frequency classes")
 <div class="alert alert-success">
   <strong>Why do we need to interpolate?</strong> 
 
-**Generally we want to _interpolate_ data because we either do not have the resources _(money and time)_ or it simply is it feasible to collect data everywhere.** 
+**Generally we want to _interpolate_ data because we either do not have the resources _(money and time)_ or it simply not feasible to collect data everywhere.** 
 
 Our data will have gaps. When these cases arrive, and they arrive often, we need a method to _predict_ values where we have non. 
 </div>
 
 ## 1. Deterministic (non-geostatistical) Methods 
 
-**These are models where arbitrary _(random)_ or empirical _(observed)_ model parameters are used with no estimates of the model error and no assumptions about the variability of a feature. In this exercise we will cover four.
+**These are models where arbitrary _(random)_ or empirical _(observed)_ model parameters are used with no estimates of the model error and no assumptions about the variability of a feature.** In this exercise we will cover four.
 
 1. a. Thiessen polygons
 
@@ -254,23 +254,34 @@ Also called a voronoi diagram these methods are characterized by abrupt edge cha
 
 ```{r voronoi }
 # Voronoi tesselation
-pnts <- st_union(meuse.sf)
-voronoi_grid <- st_voronoi(pnts)
+thiessen = krige(log10(zinc) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
 ```
 
 ```{r plot-voronoi }
 #-- plot
-plot(voronoi_grid, col = NA, #meuse.sf[,"zinc"],
-       xlim=c(178605,181390),
-       ylim=c(329714,333611))
-points(st_coordinates(meuse.sf)[,1], st_coordinates(meuse.sf)[,2],
-       pch=21,
-       bg=sp::bpy.colors(length(meuse.sf$zinc))[rank(meuse.sf$zinc)],
-       cex=0.4*meuse.sf$zinc/max(meuse.sf$zinc))
-#grid()
-title("Tesselated Voronoi Surface")
-
+pts.s <- list("sp.points", meuse.sf, col="white",pch=20)
+plot(thiessen["var1.pred"], pch=15,main="Thiessen Polygons")
 ```
+
+<!-- # ```{r voronoi } -->
+<!-- # #- Voronoi tesselation -->
+<!-- # pnts <- st_union(meuse.sf) -->
+<!-- # voronoi_grid <- st_voronoi(pnts) -->
+<!-- # ``` -->
+<!-- #  -->
+<!-- # ```{r plot-voronoi } -->
+<!-- # #-- plot -->
+<!-- # plot(voronoi_grid, col = NA, #meuse.sf[,"zinc"], -->
+<!-- #         xlim=c(178605,181390), -->
+<!-- #         ylim=c(329714,333611)) -->
+<!-- # points(st_coordinates(meuse.sf)[,1], st_coordinates(meuse.sf)[,2], -->
+<!-- #         pch=21, -->
+<!-- #         bg=sp::bpy.colors(length(meuse.sf$zinc))[rank(meuse.sf$zinc)], -->
+<!-- #        cex=0.4*meuse.sf$zinc/max(meuse.sf$zinc)) -->
+<!-- # #grid() -->
+<!-- # title("Tesselated Voronoi Surface") -->
+<!-- # ``` -->
+
 ## 1. b. Inverse Distance Weighting (IDW)
 
 With IDW we start _interpolating_ This means we convert point data of numerical values into a continuous surface and visualise how the data may be distributed across space.
