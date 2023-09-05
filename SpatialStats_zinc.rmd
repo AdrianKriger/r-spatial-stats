@@ -1,6 +1,6 @@
 ---
 ##-- arkriger: October 2023
-title: "Spatial Statistics"
+title: "Spatial Statistics with R"
 output:
   html_notebook: default
   html_document:
@@ -21,10 +21,9 @@ font-style: italic;
 
 </div>  
 
-Welcome to this exercise which explores **_geostatistical analysis with R_**. 
+Welcome to this exercise which explores **_(Geo)statistical analysis with R_**. 
 
 This assignment is an opportunity for you to dive into the `R` statistical package for spatial interpolation and in particular, to start to learn some of the capabilities of the `gstat` package (_and the various commands and some of the graphical outputs which can be produced)_.
-The commands used in this document are largely illustrative and in most cases use default arguments for the function calls. The exercise provides basic examples of the package functionality.
 
 <div class="alert alert-block alert-success"> **Our focus is understanding concepts, the analysis, potential and application of these methods.** </div>
 
@@ -32,12 +31,12 @@ We do not cover all the details of the `gstat` package capability. If you are un
 
 In this assignment, you will work through the two major _**interpolation**_ categories; using the meuse data set and the `gstat` package: These are: 
 
-&nbsp;&nbsp;&nbsp;**1) Deterministic**  
+&nbsp;&nbsp;&nbsp;**1. Deterministic**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Inverse Distance Weighting  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. linear Regression  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
-&nbsp;&nbsp;&nbsp;**2) Stochastic**  
+&nbsp;&nbsp;&nbsp;**2. Stochastic**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Kriging
 
 <div class="alert alert-danger">
@@ -50,13 +49,16 @@ You are required to insert your outputs and any comment into this document. The 
  - This should also include any hypotheses and assumptions made as well as factors that may affect your conclusions.
 </div>
 
-To help you with interpreting your outputs, please consult the following resources:
+To help you  interpret and understand your resluts, please consult the following resources:
 
 ||
 |:---|
-|**Chapter 15:** Introduction to Geographic Information Systems [9th ed.] Kang-tsung Chan. A copy of this is available on Amathuba inside the Resources folder, Study Material & Books|
-|**Chapter 8:** Applied Spatial Data Analysis with R by Bivand et. al. (2008). A copy of this is available on Amathuba inside the Resources folder, Study Material & Books|
+|**Chapter 15:** Introduction to Geographic Information Systems [9th ed.] Kang-tsung Chan.|
+|**Chapter 8:** Applied Spatial Data Analysis with R by Bivand et. al. (2008).|
 
+A copy of these are available on Amathuba inside the Resources folder, Study Material & Books
+
+----
 
 ```{r install }
 options(prompt="> ", continue="+ ", digits=3, width=70,  show.signif.stars=F, repr.plot.width=7, repr.plot.height=7)
@@ -236,19 +238,23 @@ main = "Meuse River, flooding frequency classes")
 [ Answer 3. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
 </p>
 
+___
+
 <div class="alert alert-success">
   <strong>Why do we need to interpolate?</strong> 
 
 **Generally we want to _interpolate_ data because we either do not have the resources _(money and time)_ or it simply not feasible to collect data everywhere.** 
 
-Our data will have gaps. When these cases arrive, and they arrive often, we need a method to _predict_ values where we have non. 
+Our data will have gaps. When these cases arrive, and they often do, we need a method to _predict_ values where we have non. 
 </div>
 
 ## 1. Deterministic (non-geostatistical) Methods 
 
-**These are models where arbitrary _(random)_ or empirical _(observed)_ model parameters are used with no estimates of the model error and no assumptions about the variability of a feature.** In this exercise we will cover four.
+**These are models where arbitrary** _(random)_ **or empirical** _(observed)_ **model parameters are used with no estimates of the model error and no assumptions about the variability of a feature.** 
 
-1. a. Thiessen polygons
+In this exercise we will cover four.
+
+### 1. a. Thiessen polygons
 
 Also called a voronoi diagram these methods are characterized by abrupt edge changes with only one point for each prediction.
 
@@ -262,7 +268,7 @@ thiessen = krige(log10(zinc) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
 pts.s <- list("sp.points", meuse.sf, col="white",pch=20)
 plot(thiessen["var1.pred"], pch=15,main="Thiessen Polygons")
 ```
-
+Notice we have not _interpolated_. We have assigned a value to an area.
 <!-- # ```{r voronoi } -->
 <!-- # #- Voronoi tesselation -->
 <!-- # pnts <- st_union(meuse.sf) -->
@@ -282,7 +288,9 @@ plot(thiessen["var1.pred"], pch=15,main="Thiessen Polygons")
 <!-- # title("Tesselated Voronoi Surface") -->
 <!-- # ``` -->
 
-## 1. b. Inverse Distance Weighting (IDW)
+___
+
+### 1. b. Inverse Distance Weighting (IDW)
 
 With IDW we start _interpolating_ This means we convert point data of numerical values into a continuous surface and visualise how the data may be distributed across space.
 
