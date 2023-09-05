@@ -6,8 +6,8 @@ In this exercise, we will explore the concepts and applications of Deterministic
 
 &nbsp;&nbsp;&nbsp;**1) Deterministic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Inverse Distance Weighting  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. Linear Regression  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Linear Regression 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. Inverse Distance Weighting  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
 &nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
