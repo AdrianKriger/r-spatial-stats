@@ -29,7 +29,7 @@ This assignment is an opportunity for you to dive into the `R` statistical packa
 
 We do not cover all the details of the `gstat` package capability. If you are unsure what the parameters for a particular function are or if you wish to explore other arguments related to a function, please consult the `help` files or the relevant package vignettes.
 
-In this assignment, you will work through the two major _**interpolation**_ categories; using the meuse data set and the `gstat` package: These are: 
+In this assignment, you will work through the two major _**interpolation**_ categories. These are: 
 
 &nbsp;&nbsp;&nbsp;**1. Deterministic**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
@@ -37,7 +37,9 @@ In this assignment, you will work through the two major _**interpolation**_ cate
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. linear Regression  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
 &nbsp;&nbsp;&nbsp;**2. Stochastic**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Kriging
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging
+&nbsp;&nbsp;&nbsp;**3.** we also briefly highlight methods to **interrogate the quality of an interpolation** with  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation and Residual Mean Squared Error (rmse).
 
 <div class="alert alert-danger">
   <strong>REQUIRED!</strong> 
@@ -67,12 +69,12 @@ rm(list=ls())
 # Install necessary packages: You only need to run this part once
 ##- install.packages(c("sf", "gstat", "lattice", "automap"))))
 
-library(sp)
+#library(sp)
 library(sf) # 'simple features' representations of spatial objects
 library(gstat) # geostatistics
 library(ggplot2) # plotting
-library(lattice)
-library(automap)
+#library(lattice)
+#library(automap)
 ```
 
 ```{r help }
