@@ -4,12 +4,12 @@ Welcome to this (Geo)spatial Statistics with R Assignment!
 
 In this exercise, we will explore the concepts and applications of Deterministic and Stochastic Interpolation Methods; and travese:
 
-&nbsp;&nbsp;&nbsp;**1) Deterministic**  
+&nbsp;&nbsp;&nbsp;**1) Deterministic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Inverse Distance Weighting  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. linear Regression  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
-&nbsp;&nbsp;&nbsp;**2) Stochastic**  
+&nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Kriging
 
 For these set of exersices we use a dataset that is well-suited to illustrate these concepts. The [meuse](https://search.r-project.org/CRAN/refmans/sp/html/meuse.html) data set and the `gstat` package. 
