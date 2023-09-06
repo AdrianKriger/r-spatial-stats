@@ -132,7 +132,7 @@ str(meuse.sf)
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 2.**  Which field refers to the spatial object’s geometry? What is its data type?
+- **Question 2.** Which field refers to the spatial object’s geometry? What is its data type?
 
 <p class="comment">
 [ Answer 2. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
@@ -150,7 +150,7 @@ print(st_crs(meuse.sf))
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 3.**  Execute the following 5 `blocks (chunks) of code` and briefly describe **ALL** the outputs
+- **Question 3.** Execute the following **5** `blocks (chunks) of code` and briefly describe **ALL** the outputs
 
 ```{r cadmium-summary }
 # Summary Statistics
@@ -195,6 +195,7 @@ qqnorm(log(meuse$zinc),  main = "Q-Q Plot of Log-Zinc (ppm)")
 
 par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 ```
+
 <div class="alert alert-info"> <strong>HINT</strong> Describe the original and log transformed variables with respect to data distribution _(symmetry, modality, distribution, variance [or homoescedascity] presence of outliers, etc.)_. Also indicate if the transformation was appropriate for the data.</div>
 
 <p class="comment">
@@ -221,9 +222,10 @@ class(meuse.riv.sf)
 ```{r river-summary }
 summary(meuse.riv.sf)
 ```
+
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 4.**  Execute the following code chunk and briefly describe what you observe with respect to the spatial distribution of Cadmium.
+- **Question 4.** Execute the following code chunk and briefly describe what you observe with respect to the spatial distribution of Cadmium.
 
 ```{r points-plot }
 #basic plot
@@ -231,6 +233,7 @@ plot(meuse.sf['zinc'], asp = 1, pch = 1)
 #data(meuse.riv)
 lines(meuse.riv)
 ```
+
 </style>
 <div class="alert alert-info"> <strong>HINT:</strong> How are the points distributed over the study area? For example, are they evenly-spaced (gridded)? Random? Denser in some areas?</div> 
 
@@ -238,7 +241,7 @@ lines(meuse.riv)
 [ Answer 4. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
 </p>
 
-We can add contex with the river
+We can add context with the river
 
 ```{r points-plot02 }
 plot(meuse.sf["zinc"], reset = FALSE, nbreaks = 64, pch = 20, 
@@ -264,6 +267,7 @@ ggplot(data = meuse.sf) +
   labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
        color="Distance to river [m]", size = "Zn concentration, ppm")
 ```
+
 This specific dataset comes with a 40*40-m interpolation grid (a set of regularly-spaced points that covers the study area and specify locations were predictions will be done)
 
 ```{r grid }
@@ -298,7 +302,7 @@ main = "Meuse River, flooding frequency classes")
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 6.**  What is the meaning of flood frequency class 1? What is its spatial distribution? 
+- **Question 6.** What is the meaning of flood frequency class 1? What is its spatial distribution? 
 
 </style>
 <div class="alert alert-info"> <strong>HINT:</strong> Consider using the `help` function.</div> 
@@ -312,7 +316,7 @@ ___
 <div class="alert alert-success">
   <strong>Why do we need to interpolate?</strong> 
 
-**Generally we want to _interpolate_ data because we either do not have the resources _(money and time)_ or it simply not feasible to collect data everywhere.** 
+Generally we want to _interpolate_ data because **we either do not have the resources _(money and time)_ or its simply not feasible** to collect data everywhere. 
 
 Our data will have gaps. When these cases arrive, and they often do, we need a method to _predict_ values where we have non. 
 </div>
@@ -380,7 +384,7 @@ We start with Regression and follow on with Interpolation.
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 7.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
+- **Question 7.**  Use the following code chunk to perform the various analyses required for a regression modeling with distance to river as an independent variable.
 
 ```{r plot-dist }
 # Map of distance to river: 
@@ -650,17 +654,16 @@ plot(variogram(log(zinc)~1, meuse.sf, map=TRUE, cutoff=1000, width=100))
 
 ### - Kriging
 
-Now that we have modelled the structure of our dataset _(the spatial correlation / variance)_ we use this knowledge and refine our prediction. We no longer predict values with Distance Weighting or Least Squares; we use Kriging.
+Now that we have modelled the structure of our dataset _(the spatial correlation / variance)_, with a variogram, we use this knowledge and refine our prediction. We now predict with Kriging.
 
-Kriging allows variance to be non-constant.If you recall the general form of a Least Squares solution. Notice the error term: $ϵ$. One value applied to the entire dataset. 
+Kriging allows variance to be non-constant.If you recall the general form of a Least Squares solution from earlier. Notice the error term: $ϵ$. One value applied to the entire dataset. 
 
 $$
     Z = 𝜷_0 + 𝜷_1x + 𝜷_2y + ϵ
 $$
+The error term applied with Kriging is dependent on the distance between the points; as modeled by the variogram. It are the spatially correlated residuals that we modeled in the previous step that allows us to refine our _prediction_.
 
-<div class="alert alert-danger">
-  <strong>STOP HERE!</strong> 
-</div>
+<div class="alert alert-danger"> <strong>STOP HERE!</strong> </div>
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
@@ -679,11 +682,12 @@ plot(lz.sk, pch=15, nbreaks = 64, main ="SK prediction [log10(Zn ppm)]")
 plot(lz.ok, pch=15, nbreaks = 64, main = "OK prediction [log10(Zn ppm)]")
 par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 ```
+
 <p class="comment">
 [ Answer 10. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
 
 
-div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
 - **Question 10.**  What other output(s) would you generate to access the quality of the Simple and Ordinary Kriging Interpolation?
 
@@ -705,3 +709,5 @@ div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
 <p class="comment">
 [ Answer 12. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+### 3. Variogram and Kriging
