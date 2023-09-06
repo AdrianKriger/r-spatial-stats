@@ -39,7 +39,7 @@ In this assignment, you will work through the two major _**interpolation**_ cate
 &nbsp;&nbsp;&nbsp;**2. Stochastic**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
 &nbsp;&nbsp;&nbsp;**3.** we also briefly highlight methods to **interrogate the quality of an interpolation** with  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation and  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. $n$-fold Validation and  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
 <div class="alert alert-danger">
@@ -170,17 +170,18 @@ par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
 hist(meuse.sf$zinc, n=20, main = "Histogram of Zinc (ppm)")
 #curve(dnorm(x, mean=mean(meuse.sf$zinc), sd=sd(meuse.sf$zinc)), add=TRUE)
 abline(v=mean(meuse.sf$zinc), col="red")-
-text(mean(meuse.sf$zinc),0.04,"Mean", col = "red", adj = c(-0.1, -15))
+#text(mean(meuse.sf$zinc),0.04,"Mean", col = "red", adj = c(-0.1, -15))
 abline(v=median(meuse.sf$zinc), col="blue")
-text(median(meuse.sf$zinc),0.04,"Median", col = "blue", adj = c(-0.1, -18))
+#text(median(meuse.sf$zinc),0.04,"Median", col = "blue", adj = c(-0.1, -18))
 
-hist(log(meuse.sf$zinc), n=20, main = "Histogram of Log-Zinc (ppm)", sub = NULL)
+hist(log(meuse.sf$zinc), n=20, main = "Histogram of Log-Zinc (ppm)")
 #curve(dnorm(x, mean=mean(log(meuse.sf$zinc)), sd=sd(log(meuse.sf$zinc))), add=TRUE)
 abline(v=mean(log(meuse.sf$zinc)), col="red")
-text(mean(log(meuse.sf$zinc)),0.04, "Mean", col = "red", adj = c(-0.1, -15))
+#text(mean(log(meuse.sf$zinc)),0.04, "Mean", col = "red", adj = c(-0.1, -15))
 abline(v=median(log(meuse.sf$zinc)), col="blue", main = NULL, sub = NULL)
-text(median(log(meuse.sf$zinc)),0.04, "Median", col = "blue", adj = c(-0.1, -17))
+#text(median(log(meuse.sf$zinc)),0.04, "Median", col = "blue", adj = c(-0.1, -17))
 ```
+Mean (red) and Median (blue) have been highlighted.
 
 ```{r plot-box }
 par(mfrow=c(1,2))
@@ -192,7 +193,6 @@ boxplot(log(meuse.sf$zinc), main = "Boxplot of Log-Zinc (ppm)")
 par(mfrow=c(1,2))
 qqnorm(meuse$zinc,  main = "Q-Q Plot of Zinc  (ppm)")
 qqnorm(log(meuse$zinc),  main = "Q-Q Plot of Log-Zinc (ppm)")
-
 par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 ```
 
@@ -397,7 +397,8 @@ plot(meuse.grid.sf["sqrtdist"], #col = bpy.colors() ,
 ```{r plot-scatter }
 # Map of distance to river: 
 plot(log(zinc)~sqrt(dist), as.data.frame(meuse.sf),
-     main="Scatterplot of Zinc vs. distance")
+     main="Scatterplot of log(Zn) vs. Squ. dist.")
+abline(lm(log(zinc)~sqrt(dist), meuse.sf))#, col="blue")
 ```
 
 ```{r fit-regression }
@@ -413,8 +414,10 @@ summary(zinc.lm)
 ```{r plot-diagnostic }
 # Get diagnostic plots
 layout(matrix(1:4, ncol=2))
+#options(repr.plot.width=10,repr.plot.height=10)
 plot(zinc.lm, add.smooth = FALSE)
 layout(1)
+#options(repr.plot.width=7, repr.plot.height=7)
 ```
 
 <!-- # ```{r plot-diagnostic02 } -->
@@ -433,13 +436,13 @@ meuse.grid.sf$se.fit <- predict(zinc.lm, meuse.grid.sf, se.fit=TRUE)$se.fit
 ```{r plot-preds }
 # Plot the predicted values
 plot(meuse.grid.sf['lzn.fit'], #"lzn.fit", #sp.layout = meuse.lt,
-     main = "Log(Zinc) - ppm: approximated Regression values")
+     main = "Log(Zinc) - ppm: Regression model values")
 ```
 
 ```{r plot-std-fit }
 # Plot the Standard Error of fit
 plot(meuse.grid.sf["se.fit"], #, sp.layout = meuse.lt,
-     main = "Log(Zinc) - ppm: approximated Regression Standard Error of fit")
+     main = "Log(Zinc) - ppm: Regression model Standard Error of fit")
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
@@ -476,12 +479,9 @@ meuse.grid.sf$idwp05 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 0.5)$v
 meuse.grid.sf$idwp25 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 2.5)$var1.pred
 meuse.grid.sf$idwp5 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 5)$var1.pred
 meuse.grid.sf$idwp10 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 10)$var1.pred
-# Plot the outputs and the control points 
-#plot(meuse.grid, c("idwp05", "idwp1", "idwp25","idwp5", "idwp10"), 
-#       sp.layout = list("sp.points", meuse, col = 3, cex=.5),   
-#       main = "Log(Cadmium) - ppm , IDW Interpolation")
+
 plot(meuse.grid.sf[c("idwp05",  "idwp25", "idwp5", "idwp10")], pch=15,
-     main = "Log(Cadmium) - ppm , IDW Interpolation", sub = NULL)# main="IDW") #"idwp1",
+     main = "Log(Cadmium) - ppm , IDW Interpolation")#
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> You should say something about the role of the power function and the quality/behaviour of the predictions with respect to the distribution and density of controls points etc.</div>
@@ -710,4 +710,104 @@ par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 <p class="comment">
 [ Answer 12. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
 
-### 3. Variogram and Kriging
+### 3. Validation
+
+While we have _**looked**_ at, and performed a **_qualitative analysis_** of, how the different interpolations differ we now perform a statistical analysis and execute a **_quantitative assessment_**.
+
+We evaluate the quality of our predictions with two measures.
+
+- $N$-fold cross validation and
+- Residual Mean Squared Error (RMSE)
+
+
+```{r cross }
+#library(sp)
+idw.cv.a <- krige.cv(log10(zinc) ~ 1, meuse.sf, nmax = 7, nfold=5, set = list(idp = 2.5))
+ols.cv.a <- krige.cv(log10(zinc) ~ 1, meuse.sf, degree = 2, nmax = 40, nfold=5)
+#ok.cv.a <- krige.cv(log10(zinc) ~ 1, locations = meuse.sf, model = v.fit)
+ok.cv.a  <- krige.cv(log(zinc)~1, meuse.sf, v.fit, nmax = 40, nfold=5)
+```
+
+```{r idw-cv }
+idw.cv.a[1:5,]
+```
+
+```{r ols-cv }
+ols.cv.a[1:5,]
+```
+
+```{r iok-cv }
+ok.cv.a[1:5,]
+```
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 13.** Explain what we mean with $N$-fold validation and comment on the other validation method offered by the `krige.cv()` function of the `gstat` package.
+
+<div class="alert alert-info"> <strong>HINT</strong> Imagine a _**line-of-best-fit**_ running through the correlation? </div>
+
+<p class="comment">
+[ Answer 13. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+```{r cv-correlation}
+par(mfrow=c(1,3))
+plot(var1.pred ~ observed, idw.cv.a, main="IDW", ylab="IDW pred.")
+plot(var1.pred ~ observed, ols.cv.a, main="OLS", ylab="OLS pred.")
+plot(var1.pred ~ observed, ok.cv.a, main="OK", ylab="OK pred.")
+par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+```
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 14.** Discuss the correlation between the predicted and the observed values. 
+
+<div class="alert alert-info"> <strong>HINT</strong> Imagine a _**line-of-best-fit**_ running through the correlation. </div>
+
+<p class="comment">
+[ Answer 14. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+#### Examine the distribution _(and magnitude)_ of the residuals .
+
+```{r cv-bubble-idw }
+plot(idw.cv.a["residual"], main = "log(zinc): IDW 5-fold CV residuals", #reset = FALSE,
+     cex=4*idw.cv.a$residual/max(idw.cv.a$residual), reset = FALSE)
+plot(meuse.riv.sf, add = TRUE)
+```
+
+```{r cv-bubble-ols }
+plot(ols.cv.a["residual"], main = "log(zinc): 2nd-order OLS 5-fold CV residuals",
+          cex=4*ols.cv.a$residual/max(ols.cv.a$residual), reset = FALSE)
+plot(meuse.riv.sf, add = TRUE)
+```
+```{r cv-bubble-ok }
+plot(ok.cv.a["residual"], main = "log(zinc): OK 5-fold CV residuals",
+          cex=4*ok.cv.a$residual/max(ok.cv.a$residual), reset = FALSE)
+plot(meuse.riv.sf, add = TRUE)
+```
+```{r }
+boxplot(idw.cv.a$residual, ols.cv.a$residual, ok.cv.a$residual, main="IDW, OLS, OK")
+```
+
+```{r rmse-idw}
+sqrt(sum(idw.cv.a$residual^2)/length(idw.cv.a$residual))
+```
+```{r rmse-ols}
+sqrt(sum(ols.cv.a$residual^2)/length(ols.cv.a$residual))
+```
+
+```{r rmse-iok}
+sqrt(sum(ok.cv.a$residual^2)/length(ok.cv.a$residual))
+```
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 15.** Explain the residuals. Comment on their magnitude, location and distribution.
+
+<p class="comment">
+[ Answer 15. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+<div class="alert alert-block alert-success"> <strong>DISCUSSION!</strong> </div>
+
+- **Question 16.** Having gone through a variety of interpolation methods along with both a qualitative and quantitative evaluation; which would you choose? Motivate your choice.
+
+<p class="comment">
+[ Answer 16. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+
