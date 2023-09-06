@@ -12,7 +12,7 @@ In this exercise, we will explore the concepts and applications of Deterministic
 &nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
 &nbsp;&nbsp;&nbsp;**3)** we also briefly highlight ways we can **interrogate the quality** of an interpolation with;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Cross-validation; and  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. $n$-fold validation; and  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
 For this assignment we use a dataset that is well-suited to illustrate these concepts. The [meuse](https://search.r-project.org/CRAN/refmans/sp/html/meuse.html) dataset which comes with the `gstat` package. 
