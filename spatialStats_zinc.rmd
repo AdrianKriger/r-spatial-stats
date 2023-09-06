@@ -115,10 +115,6 @@ meuse
 class(meuse)
 ```
 
-```{r str }
-str(meuse)
-```
-
 ```{r summary }
 summary(meuse)
 ```
@@ -149,6 +145,67 @@ st_crs(meuse.sf) <- 28992
 print(st_crs(meuse.sf))
 ```
 
+-----
+#### Explore the dataset
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 3.**  Execute the following 5 `blocks (chunks) of code` and briefly describe **ALL** the outputs
+
+```{r cadmium-summary }
+# Summary Statistics
+summary(meuse.sf$zinc) 
+summary(log(meuse.sf$zinc))
+```
+
+```{r plot-stem-leaf }
+# Steam and leaf plot
+stem(meuse.sf$zinc) 
+stem(log(meuse.sf$zinc))
+```
+
+```{r plot-hist }
+# Histogram and Q-Q Plots
+par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
+hist(meuse.sf$zinc, n=20, main = "Histogram of Zinc (ppm)")
+#curve(dnorm(x, mean=mean(meuse.sf$zinc), sd=sd(meuse.sf$zinc)), add=TRUE)
+abline(v=mean(meuse.sf$zinc), col="red")-
+text(mean(meuse.sf$zinc),0.04,"Mean", col = "red", adj = c(-0.1, -15))
+abline(v=median(meuse.sf$zinc), col="blue")
+text(median(meuse.sf$zinc),0.04,"Median", col = "blue", adj = c(-0.1, -18))
+
+hist(log(meuse.sf$zinc), n=20, main = "Histogram of Log-Zinc (ppm)", sub = NULL)
+#curve(dnorm(x, mean=mean(log(meuse.sf$zinc)), sd=sd(log(meuse.sf$zinc))), add=TRUE)
+abline(v=mean(log(meuse.sf$zinc)), col="red")
+text(mean(log(meuse.sf$zinc)),0.04, "Mean", col = "red", adj = c(-0.1, -15))
+abline(v=median(log(meuse.sf$zinc)), col="blue", main = NULL, sub = NULL)
+text(median(log(meuse.sf$zinc)),0.04, "Median", col = "blue", adj = c(-0.1, -17))
+```
+
+```{r plot-box }
+par(mfrow=c(1,2))
+boxplot(meuse.sf$zinc, main = "Boxplot of Zinc (ppm)")
+boxplot(log(meuse.sf$zinc), main = "Boxplot of Log-Zinc (ppm)")
+```
+
+```{r plot-qq }
+par(mfrow=c(1,2))
+qqnorm(meuse$zinc,  main = "Q-Q Plot of Zinc  (ppm)")
+qqnorm(log(meuse$zinc),  main = "Q-Q Plot of Log-Zinc (ppm)")
+
+par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+```
+<div class="alert alert-info"> <strong>HINT</strong> Describe the original and log transformed variables with respect to data distribution _(symmetry, modality, distribution, variance [or homoescedascity] presence of outliers, etc.)_. Also indicate if the transformation was appropriate for the data.</div>
+
+<p class="comment">
+[ Answer 3. click in this cell and type your answers here. your answers must be between the outer [] brackets  
+- the summary:  
+- the histogram:  
+- the boxplot:  
+- the qq plot:  
+- the mean, median, distribution, etc.
+      ]</p>
+
 To add context; the dataset includes a river object; we can include when we plot the points
 
 ```{r river }
@@ -164,6 +221,9 @@ class(meuse.riv.sf)
 ```{r river-summary }
 summary(meuse.riv.sf)
 ```
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 4.**  Execute the following code chunk and briefly describe what you observe with respect to the spatial distribution of Cadmium.
 
 ```{r points-plot }
 #basic plot
@@ -171,6 +231,13 @@ plot(meuse.sf['zinc'], asp = 1, pch = 1)
 #data(meuse.riv)
 lines(meuse.riv)
 ```
+</style>
+<div class="alert alert-info"> <strong>HINT:</strong> How are the points distributed over the study area? For example, are they evenly-spaced (gridded)? Random? Denser in some areas?</div> 
+
+<p class="comment">
+[ Answer 4. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
 We can add contex with the river
 
 ```{r points-plot02 }
@@ -181,6 +248,14 @@ plot(meuse.sf["zinc"], reset = FALSE, nbreaks = 64, pch = 20,
 plot(meuse.riv.sf, add = TRUE)
 ```
 
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 5.** Talk about positions of the data in relation to the bounds of the region, the locations of high and low values and the presence of possible outliers.
+
+<p class="comment">
+[ Answer 5. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+</p>
+
 Or we could `plot()` the dataset differently
 
 ```{r points-plot03 }
@@ -189,15 +264,6 @@ ggplot(data = meuse.sf) +
   labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
        color="Distance to river [m]", size = "Zn concentration, ppm")
 ```
-
-<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
-
-- **Question 3.**  How are the points distributed over the study area? For example, are they evenly-spaced (gridded)? Random? Denser in some areas? 
-
-<p class="comment">
-[ Answer 3. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
-</p>
-
 This specific dataset comes with a 40*40-m interpolation grid (a set of regularly-spaced points that covers the study area and specify locations were predictions will be done)
 
 ```{r grid }
@@ -232,13 +298,13 @@ main = "Meuse River, flooding frequency classes")
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 3.**  What is the meaning of flood frequency class 1? What is its spatial distribution? 
+- **Question 6.**  What is the meaning of flood frequency class 1? What is its spatial distribution? 
 
 </style>
 <div class="alert alert-info"> <strong>HINT:</strong> Consider using the `help` function.</div> 
 
 <p class="comment">
-[ Answer 3. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
+[ Answer 6. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
 </p>
 
 ___
@@ -314,7 +380,7 @@ We start with Regression and follow on with Interpolation.
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 6.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
+- **Question 7.**  Use the following code chunk to perform the various analyses required for a regression interpolation with distance to river as an independent variable.
 
 ```{r plot-dist }
 # Map of distance to river: 
@@ -375,7 +441,7 @@ plot(meuse.grid.sf["se.fit"], #, sp.layout = meuse.lt,
 <div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
 
 <p class="comment">
-[ Answer 6. click in this cell and type your answers here. your answers must be between the outer [] brackets  
+[ Answer 7. click in this cell and type your answers here. your answers must be between the outer [] brackets  
 - the distance to river:  
 - the scatter plot:  
 - the regression:  
@@ -386,87 +452,13 @@ plot(meuse.grid.sf["se.fit"], #, sp.layout = meuse.lt,
 
 ___
 
-<div class="alert alert-danger">
-  <strong>STOP HERE!</strong> 
-</div>
-
 ### 1. b. Inverse Distance Weighting (IDW)
 
 With IDW we start **_interpolating_**. This means we convert point data, of numerical values, into a continuous surface and visualize how the data may be distributed across space.
 
-IDW _interpolates_ point data by using a weighted average of a variable from nearby points to predict the value of that variable for each location.. The weighting of the points is determined by their inverse distances; drawing on Tobler’s first law of geography which states: 
+IDW _interpolates_ point data by using a weighted average of a variable from nearby points to predict the value of that variable for each location. The weighting of the points is determined by their inverse distances; drawing on Tobler’s first law of geography which states: 
 
 _'everything is related to everything else, but near things are more related than distant things'_
-
-
-
-<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
-
-- **Question 4.**  1.	Execute the following 5 blocks (chunks) of code and briefly describe all outputs
-
-```{r cadmium-summary }
-# Summary Statistics
-summary(meuse.sf$cadmium) 
-summary(log(meuse.sf$cadmium))
-```
-
-```{r plot-stem-leaf }
-# Steam and leaf plot
-stem(meuse.sf$cadmium) 
-stem(log(meuse.sf$cadmium))
-```
-
-```{r plot-hist }
-# Histogram and Q-Q Plots
-par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
-hist(meuse.sf$cadmium, n=20, main = "Histogram of Cadmium (ppm)")
-hist(log(meuse.sf$cadmium), n=20, main = "Histogram of Log-Cadmium  (ppm)")
-```
-
-```{r plot-box }
-par(mfrow=c(1,2))
-boxplot(meuse.sf$cadmium, main = "Boxplot of Cadmium (ppm)")
-boxplot(log(meuse.sf$cadmium), main = "Boxplot of Log-Cadmium (ppm)")
-```
-
-```{r plot-qq }
-par(mfrow=c(1,2))
-qqnorm(meuse$cadmium,  main = "Q-Q Plot of Cadmium  (ppm)")
-qqnorm(log(meuse$cadmium),  main = "Q-Q Plot of Log-Cadmium (ppm)")
-
-par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
-
-```
-<div class="alert alert-info"> <strong>HINT</strong> Describe the original and log transformed variables with respect to data distribution _(symmetry, modality, distribution, variance [or homoescedascity] presence of outliers, etc.)_. Also indicate if the transformation was appropriate for the data.</div>
-
-<p class="comment">
-[ Answer 4. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
-</p>
-
-<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
-
-- **Question 5.**  1.	Execute the following code chunk and briefly describe what you observe with respect to the spatial distribution of Cadmium.
-
-```{r points-plot04 }
-ggplot(data = meuse.sf) + 
-  geom_sf(mapping = aes(size=zinc, color=dist.m)) + 
-  labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
-       color="Distance to river [m]", size = "Zn concentration, ppm")
-```
-
-<div class="alert alert-info"> <strong>HINT</strong> Talk about positions of the data in relation to the bounds of the region, the locations of high and low values and the presence of possible outliers. </div>
-
-<p class="comment">
-[ Answer 5. click in this cell and type your answer here. your answer must be between the outer [] brackets ]
-</p>
-
-
-
-2. Inverse Distance Weighting (IDW)
-
-We now introduce interpolation. First deterministic methods and later highlight stocastic technics.
-
-IDW calculates an average value for estimated locations using values from nearby weighted locations.
 
 div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
@@ -475,15 +467,17 @@ div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 ```{r idw }
 # Run the IDW interpolation. check the effect of power (p) on the IDW interpolation by changing the value of "idp"
 
-meuse.grid$idwp05 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 0.5)$var1.pred
-meuse.grid$idwp1 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 1)$var1.pred
-meuse.grid$idwp25 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 2.5)$var1.pred
-meuse.grid$idwp5 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 5)$var1.pred
-meuse.grid$idwp10 = idw(log(cadmium)  ~ 1, meuse, meuse.grid, idp = 10)$var1.pred
+meuse.grid.sf$idwp05 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 0.5)$var1.pred
+#meuse.grid.sf$idwp1 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 1)$var1.pred
+meuse.grid.sf$idwp25 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 2.5)$var1.pred
+meuse.grid.sf$idwp5 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 5)$var1.pred
+meuse.grid.sf$idwp10 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 10)$var1.pred
 # Plot the outputs and the control points 
-spplot(meuse.grid, c("idwp05", "idwp1", "idwp25","idwp5", "idwp10"), 
-       sp.layout = list("sp.points", meuse, col = 3, cex=.5),   
-       main = "Log(Cadmium) - ppm , IDW Interpolation ")
+#plot(meuse.grid, c("idwp05", "idwp1", "idwp25","idwp5", "idwp10"), 
+#       sp.layout = list("sp.points", meuse, col = 3, cex=.5),   
+#       main = "Log(Cadmium) - ppm , IDW Interpolation")
+plot(meuse.grid.sf[c("idwp05",  "idwp25", "idwp5", "idwp10")], pch=15,
+     main = "Log(Cadmium) - ppm , IDW Interpolation", sub = NULL)# main="IDW") #"idwp1",
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> You should say something about the role of the power function and the quality/behaviour of the predictions with respect to the distribution and density of controls points etc.</div>
@@ -491,13 +485,21 @@ spplot(meuse.grid, c("idwp05", "idwp1", "idwp25","idwp5", "idwp10"),
 <p class="comment">
 [ Answer 7. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
 
+___
 
-3. Trend Surface Analysis with Ordinary Least Squares (OLS)
+## 1. c. Trend Surface Analysis with Ordinary Least Squares (OLS)
 
-We are now firmly in the realm of Trend Surface Analysis. What we mean by a **_trend surface_** is: a variable (say $z$ or elevation) can be expressed some smooth function of coordinates ($x_i, y_i$). A polynomial function of the coordinates. 
-In other words we; _predict_ values at upsampled locations (the `meuse grid`) with a 1st-, 2nd- and 3rd-order polynomial. The higher the degree of the polynomial (1st, 2nd, 3rd, etc.) the more the surface matches the original data. We should however take care.
+We are now firmly in the realm of Trend Surface Analysis. What we mean by a **_trend surface_** is: a variable (say $z$, zinc deposits, elevation, etc.) can be expressed some smooth function of coordinates ($x_i, y_i$). A polynomial function of the coordinates similar to:
 
-We want realistic results and a prediction within our dataset. **The higher the degree the more extreme the extrapolations.**
+$$
+    Z = 𝜷_0 + 𝜷_1x + 𝜷_2y + ϵ
+$$
+
+where: $Z$ is the is the elevation of the surface at $(x,y)$; $𝜷$ are possible coefficients representing the average elevation and slopes in the $x$ and $y$ directions and $ε$ is the error term accounting for small fluctuations and deviations from the average.
+
+In other words we; _predict_ values at upsampled locations (the `meuse grid`) with a 1st-, 2nd- or 3rd-order polynomial. The higher the degree of the polynomial (1st, 2nd, 3rd, etc.) the more the surface matches the original data. We should however take care.
+
+We want realistic results within our dataset. **The higher the degree the more extreme the extrapolations.**
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
@@ -507,11 +509,13 @@ We want realistic results and a prediction within our dataset. **The higher the 
 #-- trend surface up to degree 3
 #- Note: tr1, tr2 and tr3 are names for Trend surface of order 1, 2 and 3 respectively
 
-meuse.grid$tr1 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 1)$var1.pred
-meuse.grid$tr2 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 2)$var1.pred
-meuse.grid$tr3 = krige(log(cadmium) ~ 1, meuse, meuse.grid, degree = 3)$var1.pred
-spplot(meuse.grid, c("tr1", "tr2", "tr3"), sp.layout = meuse.lt,
-       main = "Log(cadmium) - ppm \n Trend Surface Interpolation")
+meuse.grid.sf$tr1 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 1)$var1.pred
+meuse.grid.sf$tr2 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 2)$var1.pred
+meuse.grid.sf$tr3 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 3)$var1.pred
+#spplot(meuse.grid, c("tr1", "tr2", "tr3"), sp.layout = meuse.lt,
+#       main = "Log(cadmium) - ppm \n Trend Surface Interpolation")
+plot(meuse.grid.sf[c("tr1", "tr2", "tr3")], pch=15,
+     main = "Log(zinc) - ppm Trend Surface Interpolation") #main="IDW") #"idwp1",
 
 ```
 
@@ -520,22 +524,31 @@ spplot(meuse.grid, c("tr1", "tr2", "tr3"), sp.layout = meuse.lt,
 <p class="comment">
 [ Answer 8. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
 
-3. Variogram and Kriging
+___
+
+### 2. Variogram and Kriging
 
 While OLS predicts with a polynomial and applies a general error term we can in fact go further. 
 
-One of the principles of Spatial Data Science is; **data is spatially autocorrelated**. Patterns and particularly residuals (errors) have a spatial structure / are connected.
+One of the principles of Spatial Data Science is; **data is spatially correlated**. Patterns and particularly residuals (errors) have a spatial structure / are connected.
 
 We can model the spatial structure of residuals with a **variogram**; and then use this model to refine a trend surface with Kriging; a powerful geostatistical interpolation method.
 
-First; we investigate the variance of the dataset then model and later fit this model to a special form of linear interpolation: Kriging. 
+First; we investigate the variance of the dataset _(how the observed values change)_ then model and later fit this model to a special form of linear interpolation: Kriging. 
 
-This makes sense. We determine the structure (spatial correlation) of the dataset. And we use this knowledge to refine our _least squares_ prediction.  
 
-div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+<div class="alert alert-success"> <strong>CONCEPT CHECK: Think about what this means.</strong> 
+
+We determine the structure (spatial correlation) of the dataset. And we use this knowledge to refine our prediction.  
+</div>
+
+### - The Variogram
+
+In geostatistics, **spatial correlation** is modeled with a **variogram**. What it does is explain the degree to which nearby locations have similar values using _semi-variance_. 
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
 - **Question 9.**  Use the next set of commands to estimate the variogram and to perform Kriging interpolation and comment on the output, plots and results.
-
 
 ```{r h-scatter }
 ###################################################
@@ -544,47 +557,47 @@ div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 ###################################################
 
 ### h-scatterplots/ lagged scatterplots
-hscat(log(cadmium)~1,meuse,(0:9)*100)
+hscat(log(zinc)~1, meuse.sf, (0:9)*100)
 ```
 
 ```{r v-cloud }
 ### Variogram cloud
-plot(variogram(log(cadmium) ~ 1, meuse, cloud = TRUE))
+plot(variogram(log(zinc) ~ 1, meuse.sf, cloud = TRUE))
 ```
 
 ```{r binned-variogram }
 ###################################################
 ### Sample variogram (binned variogram) plot of (8.4)
 ###################################################
-plot(variogram(log(cadmium) ~ 1, meuse))
+plot(variogram(log(zinc) ~ 1, meuse.sf))
 ```
 
 ```{r variogram-anistropy }
 ###################################################
 ### Variograms in four different angles
 ###################################################
-plot(variogram(log(cadmium) ~ 1, meuse, alpha = c(0, 45, 90, 135)))
+plot(variogram(log(zinc) ~ 1, meuse.sf, alpha = c(0, 45, 90, 135)))
 ```
 
 ```{r variogram-cut }
 ###################################################
 ### Override the default cutoff and interval width values ###  See Bivand et al. (2008)
 ###################################################
-plot(variogram(log(cadmium) ~ 1, meuse, cutoff = 1000, width = 50))
+plot(variogram(log(zinc) ~ 1, meuse.sf, cutoff = 1000, width = 50))
 ```
 
 ```{r variogram-distance }
 ###################################################
 ### Specifying interval for the distance vector  - See Bivand et al. (2008)
 ###################################################
-variogram(log(cadmium) ~ 1, meuse, boundaries = c(0,50,100,seq(250,1500,250)))
+variogram(log(zinc) ~ 1, meuse.sf, boundaries = c(0,50,100,seq(250,1500,250)))
 ```
 
 ```{r variogram }
 ######################################### ##########
 ### Variogram in Fig. 8.6 - Bivand et al. (2008)
 ###################################################
-v <- variogram(log(cadmium) ~ 1, meuse)
+v <- variogram(log(zinc) ~ 1, meuse.sf)
 plot(v)
 ```
 
@@ -593,6 +606,7 @@ plot(v)
 ### Initial values for the variogram fit 
 ###################################################
 v.fit <- fit.variogram(v, vgm(1, "Sph", 800, 1))
+plot(v, pl = T, model = v.fit)
 ```
 
 ```{r variogram-partial }
@@ -602,22 +616,20 @@ v.fit <- fit.variogram(v, vgm(1, "Sph", 800, 1))
 fit.variogram(v, vgm(1, "Sph", 800, 0.06), fit.sills = c(FALSE, TRUE))
 ```
 
-```{r reml }
-###################################################
-###  REML (restricted maximum likelihood) fitting : PAGE 205 - Bivand et al. (2008)
-###################################################
-fit.variogram.reml(log(cadmium)~1, meuse, model=vgm(0.6, "Sph", 800, 0.06))
-```
+<!-- # ```{r reml } -->
+<!-- # ################################################### -->
+<!-- # ###  REML (restricted maximum likelihood) fitting : PAGE 205 - Bivand et al. (2008) -->
+<!-- # ################################################### -->
+<!-- # fit.variogram.reml(log(zinc)~1, meuse.sf, model=vgm(0.6, "Sph", 800, 0.06)) -->
+<!-- # ``` -->
 
-```{r variogram-anistropy02 }
+```{r variogram-anistropy-plot }
 ###################################################
 ### 8.4.4 Anisotropy  - Bivand et al. (2008)
 ###################################################
-v.dir <- variogram(log(cadmium)~1,meuse,alpha=(0:3)*45) 
+v.dir <- variogram(log(zinc)~1, meuse.sf, alpha=(0:3)*45) 
 v.anis <- vgm(.6, "Sph", 1600, .05, anis=c(45, 0.3))
-```
 
-```{r variogram-plot }
 ###################################################
 ### Fig. 8.7 - Bivand et al. (2008)
 ###################################################
@@ -628,33 +640,48 @@ plot(v.dir, v.anis)
 ###################################################
 ### variogram map - Bivand et al. (2008)
 ###################################################
-plot(variogram(log(cadmium)~1,meuse, map=TRUE, cutoff=1000, width=100))
-```
-
-```{r osk-ok-kriging }
-###################################################
-### 8.5.1 Simple Kriging and Ordinary Kriging  - Bivand et al. (2008)
-###################################################
-lz.sk <- krige(log(cadmium)~1, meuse, meuse.grid, v.fit, beta = 5.9)
-lz.ok <- krige(log(cadmium)~1, meuse, meuse.grid, v.fit)
-
-par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
-
-plot(lz.sk, pch=15,
-nbreaks = 64,
-main="SK prediction [log10(Cd ppm)]")
-
-plot(lz.ok, pch=15,
-nbreaks = 64,
-main="OK prediction [log10(Cd ppm)]")
-
-par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+plot(variogram(log(zinc)~1, meuse.sf, map=TRUE, cutoff=1000, width=100))
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> Page numbers or plot numbers from sections with similar outputs from Bivand et al. (2008) have been indicated in the comments attached to the codes. Please refer to those sections/plots for guidance. In general, discuss all outputs (text and plots). What they are, what they do, what assumptions have been made etc.</div>
 
 <p class="comment">
 [ Answer 9. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
+### - Kriging
+
+Now that we have modelled the structure of our dataset _(the spatial correlation / variance)_ we use this knowledge and refine our prediction. We no longer predict values with Distance Weighting or Least Squares; we use Kriging.
+
+Kriging allows variance to be non-constant.If you recall the general form of a Least Squares solution. Notice the error term: $ϵ$. One value applied to the entire dataset. 
+
+$$
+    Z = 𝜷_0 + 𝜷_1x + 𝜷_2y + ϵ
+$$
+
+<div class="alert alert-danger">
+  <strong>STOP HERE!</strong> 
+</div>
+
+<div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
+
+- **Question 10.**  Use the next command to perform Kriging interpolation and comment on the output, plot and results.
+
+
+```{r osk-ok-kriging }
+###################################################
+### 8.5.1 Simple Kriging and Ordinary Kriging  - Bivand et al. (2008)
+###################################################
+lz.sk <- krige(log(zinc)~1, meuse.sf, meuse.grid.sf, v.fit, beta = 5.9)
+lz.ok <- krige(log(zinc)~1, meuse.sf, meuse.grid.sf, v.fit)
+
+par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
+plot(lz.sk, pch=15, nbreaks = 64, main ="SK prediction [log10(Zn ppm)]")
+plot(lz.ok, pch=15, nbreaks = 64, main = "OK prediction [log10(Zn ppm)]")
+par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
+```
+<p class="comment">
+[ Answer 10. click in this cell and type your answer here. your answer must be between the outer [] brackets ] </p>
+
 
 div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
