@@ -638,7 +638,7 @@ plot(variogram(log(zinc)~1, meuse.sf, map=TRUE, cutoff=1000, width=100))
 - the lagged scatterplots:  
 - the variogram cloud and sample variogram:  
 - variogram in four directions and what these indicate:  
-- the variogram modela and fit. its sill range and nugget:  
+- the variogram model and fit. its sill range and nugget:  
       ]</p>
 
 ### - Kriging
@@ -774,16 +774,16 @@ boxplot(idw.cv.a$residual, ols.cv.a$residual, ok.cv.a$residual, main="IDW 2.5 , 
 ```
 
 ```{r rmse-idw}
-#- idw 2.5
+#- idw 2.5 rmse
 sqrt(sum(idw.cv.a$residual^2)/length(idw.cv.a$residual))
 ```
 ```{r rmse-ols}
-#- 2nd-order ols
+#- 2nd-order ols rmse
 sqrt(sum(ols.cv.a$residual^2)/length(ols.cv.a$residual))
 ```
 
 ```{r rmse-iok}
-#- ok
+#- ok rmse
 sqrt(sum(ok.cv.a$residual^2)/length(ok.cv.a$residual))
 ```
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
