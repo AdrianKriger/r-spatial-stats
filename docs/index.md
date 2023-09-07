@@ -8,14 +8,15 @@ description: "Spatial Statistics with R."
 # (Geo)spatial Statistics with R (Meuse)
 {: .fs-9 }
 
+In this exercise, we will explore the concepts and applications of Deterministic and Stochastic Interpolation Methods. 
+
 <figure><center>
   <img src="{{site.baseurl | prepend: site.url}}/img/preds.png" style="width: 800px; height: 300px; border: 0px">
   <figcaption>Fig.1 - Inverse Distance Weighting, 2nd-order Ordinary Least Squares and Ordinary Kriging interpolation </figcaption>
 </center></figure> 
 
-In this exercise, we will explore the concepts and applications of Deterministic and Stochastic Interpolation Methods. We traverse such technics as:
-
 <!-- <iframe src="{{site.baseurl | prepend: site.url}}/img/plotly.html" style="width: 800px; height: 300px; border: 0px"></iframe> -->
+We traverse such technics as:
 
 &nbsp;&nbsp;&nbsp;**1) Deterministic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
