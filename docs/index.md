@@ -20,7 +20,7 @@ In this exercise, we will explore the concepts and applications of Deterministic
 
 <figure><center>
   <img src="{{site.baseurl | prepend: site.url}}/img/preds" style="width: 800px; height: 400px; border: 0px">
-  <!--<figcaption>Fig.1 - LoD1 3D Model of the Cape Peninsula University of Technology (Bellville Campus). <em>---streets are in the pipeline; see <cite><a href="https://github.com/AdrianKriger/osm_LoD1_3DCityModel/issues/17"> issue #17</a></cite></em></figcaption> -->
+  <!--<figcaption>Fig.1 - Inverse Distance Weighting, 2nd-order Ordinary Least Squares and Ordinary Kriging interpolation </figcaption> -->
 </center></figure> 
 <!-- <img src="/img/preds.png" alt="predictions" img> -->
 
