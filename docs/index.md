@@ -26,7 +26,7 @@ We traverse such technics as:
 &nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
 &nbsp;&nbsp;&nbsp;**3)** we also briefly highlight ways we can **interrogate the quality** of an interpolation with;  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. $N$-fold cross validation; and  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. N$-fold cross validation; and  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
 <!--<figure><center>
