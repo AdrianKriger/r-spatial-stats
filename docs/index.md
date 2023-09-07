@@ -29,10 +29,10 @@ We traverse such technics as:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. $N$-fold cross validation; and  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. Residual Mean Squared Error (rmse).
 
-<!-- <figure><center>
+<!--<figure><center>
   <img src="{{site.baseurl | prepend: site.url}}/img/5-fold.png" style="width: 800px; height: 300px; border: 0px">
-  <!-- <figcaption>Fig.2 - Inverse Distance Weighting, 2nd-order Ordinary Least Squares and Ordinary Kriging interpolation </figcaption> -->
-</center></figure> -->
+  <figcaption>Fig.2 - Inverse Distance Weighting, 2nd-order Ordinary Least Squares and Ordinary Kriging interpolation </figcaption>
+</center></figure>-->
 _____
 For this assignment we use a dataset that is well-suited to illustrate these concepts. The [meuse](https://search.r-project.org/CRAN/refmans/sp/html/meuse.html) dataset which comes with the `gstat` package. 
 **meuse**: gives locations (on a regular grid) and topsoil heavy metal concentrations, along with a number of soil and landscape variables at the observation locations, collected in a flood plain of the river Meuse, near the village of Stein (NL). Heavy metal concentrations are from composite samples of an area of approximately 15 m x 15 m.
