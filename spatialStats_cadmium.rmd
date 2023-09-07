@@ -154,39 +154,39 @@ print(st_crs(meuse.sf))
 
 ```{r cadmium-summary }
 # Summary Statistics
-summary(meuse.sf$zinc) 
-summary(log(meuse.sf$zinc))
+summary(meuse.sf$cadmium) 
+summary(log(meuse.sf$cadmium))
 ```
 
 ```{r plot-stem-leaf }
 # Steam and leaf plot
-stem(meuse.sf$zinc) 
-stem(log(meuse.sf$zinc))
+stem(meuse.sf$cadmium) 
+stem(log(meuse.sf$cadmium))
 ```
 
 ```{r plot-hist }
 # Histogram and Q-Q Plots
 par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
-hist(meuse.sf$zinc, n=20, main = "Histogram of Zinc (ppm)")
-abline(v=mean(meuse.sf$zinc), col="red")-
-abline(v=median(meuse.sf$zinc), col="blue")
+hist(meuse.sf$cadmium, n=20, main = "Histogram of cadmium (ppm)")
+abline(v=mean(meuse.sf$cadmium), col="red")-
+abline(v=median(meuse.sf$cadmium), col="blue")
 
-hist(log(meuse.sf$zinc), n=20, main = "Histogram of Log-Zinc (ppm)")
-abline(v=mean(log(meuse.sf$zinc)), col="red")
-abline(v=median(log(meuse.sf$zinc)), col="blue", main = NULL, sub = NULL)
+hist(log(meuse.sf$cadmium), n=20, main = "Histogram of Log-cadmium (ppm)")
+abline(v=mean(log(meuse.sf$cadmium)), col="red")
+abline(v=median(log(meuse.sf$cadmium)), col="blue", main = NULL, sub = NULL)
 ```
 Mean (red) and Median (blue) have been highlighted.
 
 ```{r plot-box }
 par(mfrow=c(1,2))
-boxplot(meuse.sf$zinc, main = "Boxplot of Zinc (ppm)")
-boxplot(log(meuse.sf$zinc), main = "Boxplot of Log-Zinc (ppm)")
+boxplot(meuse.sf$cadmium, main = "Boxplot of cadmium (ppm)")
+boxplot(log(meuse.sf$cadmium), main = "Boxplot of Log-cadmium (ppm)")
 ```
 
 ```{r plot-qq }
 par(mfrow=c(1,2))
-qqnorm(meuse$zinc,  main = "Q-Q Plot of Zinc  (ppm)")
-qqnorm(log(meuse$zinc),  main = "Q-Q Plot of Log-Zinc (ppm)")
+qqnorm(meuse$cadmium,  main = "Q-Q Plot of cadmium  (ppm)")
+qqnorm(log(meuse$cadmium),  main = "Q-Q Plot of Log-cadmium (ppm)")
 par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 ```
 
@@ -223,7 +223,7 @@ summary(meuse.riv.sf)
 
 ```{r points-plot }
 #basic plot
-plot(meuse.sf['zinc'], asp = 1, pch = 1) 
+plot(meuse.sf['cadmium'], asp = 1, pch = 1) 
 ```
 
 </style>
@@ -236,10 +236,10 @@ plot(meuse.sf['zinc'], asp = 1, pch = 1)
 We can add context with the river
 
 ```{r points-plot02 }
-plot(meuse.sf["zinc"], reset = FALSE, nbreaks = 64, pch = 20, 
-     cex=4*meuse.sf$zinc/max(meuse.sf$zinc), 
+plot(meuse.sf["cadmium"], reset = FALSE, nbreaks = 64, pch = 20, 
+     cex=4*meuse.sf$cadmium/max(meuse.sf$cadmium), 
      #col=rainbow(100),
-     main = "Zn concentration [ppm]") 
+     main = "Cd concentration [ppm]") 
 plot(meuse.riv.sf, add = TRUE)
 ```
 
@@ -255,9 +255,9 @@ Or we could `plot()` the dataset differently
 
 ```{r points-plot03 }
 ggplot(data = meuse.sf) + 
-  geom_sf(mapping = aes(size=zinc, color=dist.m)) + 
+  geom_sf(mapping = aes(size=cadmium, color=dist.m)) + 
   labs(x = "Longitude", y = "Latitude", title = "Meuse River (NL)", 
-       color="Distance to river [m]", size = "Zn concentration, ppm")
+       color="Distance to river [m]", size = "Cd concentration, ppm")
 ```
 
 This specific dataset comes with a 40*40-m interpolation grid (a set of regularly-spaced points that covers the study area and specify locations were predictions will be done)
@@ -327,22 +327,22 @@ Also called a voronoi diagram these methods are characterized by abrupt edge cha
 #- Voronoi tesselation
 pnts <- st_union(meuse.sf)
 voronoi_grid <- st_voronoi(pnts)
+meuse.sf$lcd <- log(meuse.sf$cadmium)
 voronoi_sf <- st_sf(geometry = st_collection_extract(voronoi_grid, "POLYGON")) |>
-  st_join(meuse.sf[,"zinc"])
+  st_join(meuse.sf[,"lcd"])
 ```
 
 ```{r plot-voronoi-vector }
 #-- plot
-plot(voronoi_sf[,"zinc"],
+plot(voronoi_sf[,"lcd"],
      xlim=c(178605,181390),
      ylim=c(329714,333611), main="Thiessen Polygons")
-#title("Tesselated Voronoi Surface")
 ```
 Or we could create a tessellated surface directly
 
 ```{r voronoi }
 # Voronoi tesselation
-thiessen = krige(log10(zinc) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
+thiessen = krige(log10(cadmium) ~ 1, meuse.sf, meuse.grid.sf, nmax = 1)
 ```
 
 ```{r plot-voronoi }
@@ -388,51 +388,51 @@ plot(meuse.grid.sf["sqrtdist"], pch = 15,
 
 ```{r plot-scatter }
 # Map of distance to river: 
-plot(log(zinc)~sqrt(dist), as.data.frame(meuse.sf),
-     main="Scatterplot of log(Zn) vs. Squ. dist.")
-abline(lm(log(zinc)~sqrt(dist), meuse.sf))#, col="blue")
+plot(log(cadmium)~sqrt(dist), as.data.frame(meuse.sf),
+     main="Scatterplot of log(Cd) vs. Squ. dist.")
+abline(lm(log(cadmium)~sqrt(dist), meuse.sf))#, col="blue")
 ```
 
 ```{r fit-regression }
 # Fit the regression model
-zinc.lm <- lm(log(zinc)~sqrt(dist), meuse.sf)
+cadmium.lm <- lm(log(cadmium)~sqrt(dist), meuse.sf)
 ```
 
 ```{r summary-reg }
 # Get a summary of the regression model
-summary(zinc.lm)
+summary(cadmium.lm)
 ```
 
 ```{r plot-diagnostic }
 # Get diagnostic plots
 layout(matrix(1:4, ncol=2))
-plot(zinc.lm, add.smooth = FALSE)
+plot(cadmium.lm, add.smooth = FALSE)
 layout(1)
 ```
 
 <!-- # ```{r plot-diagnostic02 } -->
 <!-- # # Get diagnostic plots -->
 <!-- # layout(matrix(1:4, ncol=2)) -->
-<!-- # plot(zinc.lm, add.smooth = FALSE) -->
+<!-- # plot(cadmium.lm, add.smooth = FALSE) -->
 <!-- # layout(1) -->
 <!-- # ``` -->
 
 ```{r predict-std-error }
 # Get Predicted Values and Standard Error of Fit for all locations on the grid
-meuse.grid.sf$lzn.fit <- predict(zinc.lm, meuse.grid.sf)
-meuse.grid.sf$se.fit <- predict(zinc.lm, meuse.grid.sf, se.fit=TRUE)$se.fit
+meuse.grid.sf$lzn.fit <- predict(cadmium.lm, meuse.grid.sf)
+meuse.grid.sf$se.fit <- predict(cadmium.lm, meuse.grid.sf, se.fit=TRUE)$se.fit
 ```
 
 ```{r plot-preds }
 # Plot the predicted values
 plot(meuse.grid.sf['lzn.fit'], pch = 15, #"lzn.fit", #sp.layout = meuse.lt,
-     main = "Log(Zinc) - ppm: Regression model values")
+     main = "Log(Cadmium) - ppm: Regression model values")
 ```
 
 ```{r plot-std-fit }
 # Plot the Standard Error of fit
 plot(meuse.grid.sf["se.fit"], pch = 15,
-     main = "Log(Zinc) - ppm: Regression model Standard Error of fit")
+     main = "Log(Cadmium) - ppm: Regression model Standard Error of fit")
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> You should include a discussion on the nature of relationship between the dependent and independent variable, the model fit: model summary and regression diagnostics [say which, (if any), of the assumptions underlying linear regression are violated and the quality of interpolation with respect to the distribution and density of controls points etc. </div>
@@ -463,15 +463,15 @@ ____
 
 <div class="alert alert-warning"> <strong>QUESTION!</strong> </div>
 
-- **Question 8.**  Use the following `code chunk` to generate interpolated surfaces of log (zinc) concentrations obtained using Inverse-Distance Weighting (IDW) with different power functions (`idp`). Discuss all outputs and draw conclusions. Give reasons for your conclusions.
+- **Question 8.**  Use the following `code chunk` to generate interpolated surfaces of log (cadmium) concentrations obtained using Inverse-Distance Weighting (IDW) with different power functions (`idp`). Discuss all outputs and draw conclusions. Give reasons for your conclusions.
 
 ```{r idw }
 # Run the IDW interpolation. check the effect of power (p) on the IDW interpolation by changing the value of "idp"
 
-meuse.grid.sf$idwp05 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 0.5)$var1.pred
-meuse.grid.sf$idwp25 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 2.5)$var1.pred
-meuse.grid.sf$idwp5 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 5)$var1.pred
-meuse.grid.sf$idwp10 = idw(log(zinc)  ~ 1, meuse.sf, meuse.grid.sf, idp = 10)$var1.pred
+meuse.grid.sf$idwp05 = idw(log(cadmium)  ~ 1, meuse.sf, meuse.grid.sf, idp = 0.5)$var1.pred
+meuse.grid.sf$idwp25 = idw(log(cadmium)  ~ 1, meuse.sf, meuse.grid.sf, idp = 2.5)$var1.pred
+meuse.grid.sf$idwp5 = idw(log(cadmium)  ~ 1, meuse.sf, meuse.grid.sf, idp = 5)$var1.pred
+meuse.grid.sf$idwp10 = idw(log(cadmium)  ~ 1, meuse.sf, meuse.grid.sf, idp = 10)$var1.pred
 
 plot(meuse.grid.sf[c("idwp05",  "idwp25", "idwp5", "idwp10")], pch=15,
      main = "Log(Cadmium) - ppm , IDW Interpolation")
@@ -486,7 +486,7 @@ ___
 
 ## 1. c. Trend Surface Analysis with Ordinary Least Squares (OLS)
 
-We are now firmly in the realm of _Trend Surface Analysis_. What we mean by a **_trend surface_** is: a variable (say $z$, zinc deposits, elevation, etc.) can be expressed as some smooth function of coordinates ($x_i, y_i$). A polynomial function of the coordinates similar to:
+We are now firmly in the realm of _Trend Surface Analysis_. What we mean by a **_trend surface_** is: a variable (say $z$, cadmium deposits, elevation, etc.) can be expressed as some smooth function of coordinates ($x_i, y_i$). A polynomial function of the coordinates similar to:
 
 $$
     Z = 𝜷_0 + 𝜷_1x + 𝜷_2y + ϵ
@@ -506,11 +506,11 @@ We want realistic results within our dataset. **The higher the degree the more e
 #-- trend surface up to degree 3
 #- Note: tr1, tr2 and tr3 are names for Trend surface of order 1, 2 and 3 respectively
 
-meuse.grid.sf$tr1 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 1)$var1.pred
-meuse.grid.sf$tr2 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 2)$var1.pred
-meuse.grid.sf$tr3 = krige(log(zinc) ~ 1, meuse.sf, meuse.grid.sf, degree = 3)$var1.pred
+meuse.grid.sf$tr1 = krige(log(cadmium) ~ 1, meuse.sf, meuse.grid.sf, degree = 1)$var1.pred
+meuse.grid.sf$tr2 = krige(log(cadmium) ~ 1, meuse.sf, meuse.grid.sf, degree = 2)$var1.pred
+meuse.grid.sf$tr3 = krige(log(cadmium) ~ 1, meuse.sf, meuse.grid.sf, degree = 3)$var1.pred
 plot(meuse.grid.sf[c("tr1", "tr2", "tr3")], pch=15,
-     main = "Log(zinc) - ppm Trend Surface Interpolation") #main="IDW") #"idwp1",
+     main = "Log(Cadmium) - ppm Trend Surface Interpolation") #main="IDW") #"idwp1",
 
 ```
 
@@ -552,47 +552,47 @@ In geostatistics, **spatial correlation** is modeled with a **variogram**. What 
 ###################################################
 
 ### h-scatterplots/ lagged scatterplots
-hscat(log(zinc)~1, meuse.sf, (0:8)*100)
+hscat(log(cadmium)~1, meuse.sf, (0:8)*100)
 ```
 
 ```{r v-cloud }
 ### Variogram cloud
-plot(variogram(log(zinc) ~ 1, meuse.sf, cloud = TRUE))
+plot(variogram(log(cadmium) ~ 1, meuse.sf, cloud = TRUE))
 ```
 
 ```{r binned-variogram }
 ###################################################
 ### Sample variogram (binned variogram) plot of (8.4)
 ###################################################
-plot(variogram(log(zinc) ~ 1, meuse.sf))
+plot(variogram(log(cadmium) ~ 1, meuse.sf))
 ```
 
 ```{r variogram-anistropy }
 ###################################################
 ### Variograms in four different angles
 ###################################################
-plot(variogram(log(zinc) ~ 1, meuse.sf, alpha = c(0, 45, 90, 135)))
+plot(variogram(log(cadmium) ~ 1, meuse.sf, alpha = c(0, 45, 90, 135)))
 ```
 
 ```{r variogram-cut }
 ###################################################
 ### Override the default cutoff and interval width values ###  See Bivand et al. (2008)
 ###################################################
-plot(variogram(log(zinc) ~ 1, meuse.sf, cutoff = 1000, width = 50))
+plot(variogram(log(cadmium) ~ 1, meuse.sf, cutoff = 1000, width = 50))
 ```
 
 ```{r variogram-distance }
 ###################################################
 ### Specifying interval for the distance vector  - See Bivand et al. (2008)
 ###################################################
-variogram(log(zinc) ~ 1, meuse.sf, boundaries = c(0,50,100,seq(250,1500,250)))
+variogram(log(cadmium) ~ 1, meuse.sf, boundaries = c(0,50,100,seq(250,1500,250)))
 ```
 
 ```{r variogram }
 ######################################### ##########
 ### Variogram in Fig. 8.6 - Bivand et al. (2008)
 ###################################################
-v <- variogram(log(zinc) ~ 1, meuse.sf)
+v <- variogram(log(cadmium) ~ 1, meuse.sf)
 plot(v)
 ```
 
@@ -615,7 +615,7 @@ fit.variogram(v, vgm(1, "Sph", 800, 0.06), fit.sills = c(FALSE, TRUE))
 ###################################################
 ### 8.4.4 Anisotropy  - Bivand et al. (2008)
 ###################################################
-v.dir <- variogram(log(zinc)~1, meuse.sf, alpha=(0:3)*45) 
+v.dir <- variogram(log(cadmium)~1, meuse.sf, alpha=(0:3)*45) 
 v.anis <- vgm(.6, "Sph", 1600, .05, anis=c(45, 0.3))
 
 ###################################################
@@ -628,7 +628,7 @@ plot(v.dir, v.anis)
 ###################################################
 ### variogram map - Bivand et al. (2008)
 ###################################################
-plot(variogram(log(zinc)~1, meuse.sf, map=TRUE, cutoff=1000, width=100))
+plot(variogram(log(cadmium)~1, meuse.sf, map=TRUE, cutoff=1000, width=100))
 ```
 
 <div class="alert alert-info"> <strong>HINT</strong> Page numbers or plot numbers from sections with similar outputs from Bivand et al. (2008) have been indicated in the comments attached to the codes. Please refer to those sections/plots for guidance. In general, discuss all outputs (text and plots). What they are, what they do, what assumptions have been made etc.</div>
@@ -661,13 +661,13 @@ The error term applied with Kriging is dependent on the distance between the poi
 ###################################################
 ### 8.5.1 Simple Kriging and Ordinary Kriging  - Bivand et al. (2008)
 ###################################################
-lz.sk <- krige(log(zinc)~1, meuse.sf, meuse.grid.sf, v.fit, beta = 5.9)
-lz.ok <- krige(log(zinc)~1, meuse.sf, meuse.grid.sf, v.fit)
+lz.sk <- krige(log(cadmium)~1, meuse.sf, meuse.grid.sf, v.fit, beta = 5.9)
+lz.ok <- krige(log(cadmium)~1, meuse.sf, meuse.grid.sf, v.fit)
 
 par(mfrow=c(1,2)) # arranged in 1 row and 2 columns
-plot(lz.sk['var1.pred'], pch=15, nbreaks = 64, main ="Simple Kriging [log10(Zn ppm)]",
+plot(lz.sk['var1.pred'], pch=15, nbreaks = 64, main ="Simple Kriging [log10(Cd ppm)]",
      reset = FALSE)
-plot(lz.ok['var1.pred'], pch=15, nbreaks = 64, main = "Ordinary Kriging [log10(Zn ppm)]")
+plot(lz.ok['var1.pred'], pch=15, nbreaks = 64, main = "Ordinary Kriging [log10(Cd ppm)]")
 par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 ```
 
@@ -709,9 +709,9 @@ We evaluate the quality of our predictions with two measures.
 
 
 ```{r cross }
-idw.cv.a <- krige.cv(log(zinc) ~ 1, meuse.sf, nmax = 7, nfold=5, set = list(idp = 2.5))
-ols.cv.a <- krige.cv(log(zinc) ~ 1, meuse.sf, degree = 2, nmax = 40, nfold=5)
-ok.cv.a  <- krige.cv(log(zinc)~1, meuse.sf, v.fit, nmax = 40, nfold=5)
+idw.cv.a <- krige.cv(log(cadmium) ~ 1, meuse.sf, nmax = 7, nfold=5, set = list(idp = 2.5))
+ols.cv.a <- krige.cv(log(cadmium) ~ 1, meuse.sf, degree = 2, nmax = 40, nfold=5)
+ok.cv.a  <- krige.cv(log(cadmium)~1, meuse.sf, v.fit, nmax = 40, nfold=5)
 ```
 
 ```{r idw-cv }
@@ -754,18 +754,18 @@ par(mfrow=c(1,1)) # Reset to default plotting of 1 figure per page
 #### Examine the distribution _(and magnitude)_ of the residuals .
 
 ```{r cv-bubble-idw }
-plot(idw.cv.a["residual"], main = "log(zinc): IDW 2.5 5-fold CV residuals", #reset = FALSE,
+plot(idw.cv.a["residual"], main = "log(cadmium): IDW 2.5 5-fold CV residuals", #reset = FALSE,
      cex=4*idw.cv.a$residual/max(idw.cv.a$residual), reset = FALSE)
 plot(meuse.riv.sf, add = TRUE)
 ```
 
 ```{r cv-bubble-ols }
-plot(ols.cv.a["residual"], main = "log(zinc): 2nd-order OLS 5-fold CV residuals",
+plot(ols.cv.a["residual"], main = "log(cadmium): 2nd-order OLS 5-fold CV residuals",
           cex=4*ols.cv.a$residual/max(ols.cv.a$residual), reset = FALSE)
 plot(meuse.riv.sf, add = TRUE)
 ```
 ```{r cv-bubble-ok }
-plot(ok.cv.a["residual"], main = "log(zinc): OK 5-fold CV residuals",
+plot(ok.cv.a["residual"], main = "log(cadmium): OK 5-fold CV residuals",
           cex=4*ok.cv.a$residual/max(ok.cv.a$residual), reset = FALSE)
 plot(meuse.riv.sf, add = TRUE)
 ```
