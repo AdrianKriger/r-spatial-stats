@@ -18,7 +18,11 @@ In this exercise, we will explore the concepts and applications of Deterministic
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c. Inverse Distance Weighting  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d. Ordinary Least Squares  
 
-<img src="/img/preds.png" alt="predictions">
+<figure><center>
+  <img src="{{site.baseurl | prepend: site.url}}/img/preds" style="width: 800px; height: 400px; border: 0px">
+  <!--<figcaption>Fig.1 - LoD1 3D Model of the Cape Peninsula University of Technology (Bellville Campus). <em>---streets are in the pipeline; see <cite><a href="https://github.com/AdrianKriger/osm_LoD1_3DCityModel/issues/17"> issue #17</a></cite></em></figcaption> -->
+</center></figure> 
+<!-- <img src="/img/preds.png" alt="predictions" img> -->
 
 &nbsp;&nbsp;&nbsp;**2) Stochastic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Variograms and Kriging  
