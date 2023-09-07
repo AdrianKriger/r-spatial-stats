@@ -10,7 +10,7 @@ description: "Spatial Statistics with R."
 
 In this exercise, we will explore the concepts and applications of Deterministic and Stochastic Interpolation Methods. We traverse such technics as:
 
-<!-- <iframe src="{{site.baseurl | prepend: site.url}}/img/plotly.html" style="width: 800px; height: 400px; border: 0px"></iframe> -->
+<!-- <iframe src="{{site.baseurl | prepend: site.url}}/img/plotly.html" style="width: 800px; height: 300px; border: 0px"></iframe> -->
 
 &nbsp;&nbsp;&nbsp;**1) Deterministic methods**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a. Thiessen polygons  
