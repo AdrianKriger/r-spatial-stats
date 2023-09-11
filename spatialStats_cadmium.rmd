@@ -52,7 +52,7 @@ You are required to insert your outputs and any comment into this document. The 
  - This should also include any hypotheses and assumptions made as well as factors that may affect your conclusions.
 </div>
 
-To help you  interpret and understand your resluts, please consult the following resources:
+To help you  interpret and understand your results, please consult the following resources:
 
 |||
 |-|:---|
